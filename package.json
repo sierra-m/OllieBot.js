@@ -1,12 +1,17 @@
 {
   "name": "olliebot.js",
   "version": "1.0.0",
+  "scripts": {
+    "start": "node dist/app.js"
+  },
   "dependencies": {
-    "@babel/polyfill": "^7.7.0"
+    "@babel/polyfill": "^7.7.0",
+    "discord.js": "^11.5.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.5",
     "@babel/core": "^7.7.5",
+    "@babel/plugin-proposal-decorators": "^7.7.4",
     "@babel/preset-env": "^7.7.6"
   }
 }
