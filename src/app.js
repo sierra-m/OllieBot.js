@@ -1,21 +1,23 @@
 import fs from 'fs'
 import Discord from 'discord.js'
-import {prefix, token} from '../config'
+import {prefix, token} from './config'
 import CommandHandler from './commandhandler'
+import "regenerator-runtime/runtime";
 
-const client = new Discord.Client();
-client.commandHandler = new CommandHandler(prefix, ['fun', 'util']);
+const bot = new Discord.Client();
+bot.commandHandler = new CommandHandler(prefix, ['fun', 'util']);
 
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+// handy random util
+Array.prototype.random = function () {
+  return this[Math.floor((Math.random()*this.length))];
+};
 
-client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
+bot.on('ready', () => {
+  console.log(`Logged in as ${bot.user.tag}!`);
 });
 
-client.on('message', msg => {
-  if (msg.content === '.good') {
-    msg.reply('no but actually you');
-  }
+bot.on('message', async msg => {
+  await bot.commandHandler.handle(bot, msg);
 });
 
-client.login('');
+bot.login(token);
