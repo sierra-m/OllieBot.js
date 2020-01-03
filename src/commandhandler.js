@@ -3,16 +3,12 @@ import path from 'path'
 import Discord from 'discord.js'
 
 class CommandHandler {
-  constructor (prefix, cogs) {
+  constructor (prefix, groups) {
     this.prefix = prefix;
-    this.commands = new Discord.Collection();
-    console.log(__dirname);
-    for (let cog of cogs) {
-      const commandFiles = fs.readdirSync(path.resolve(__dirname, 'commands', cog)).filter(file => file.endsWith('.js'));
-      for (const file of commandFiles) {
-        const command = require(`./commands/${cog}/${file}`);
-        this.commands.set(command.name, command);
-      }
+    this.commandGroups = [];
+    for (let group of groups) {
+      const groupClass = require(`./commands/${group}.js`).default;
+      this.commandGroups.push(new groupClass());
     }
   }
   async handle (bot, message) {
@@ -22,7 +18,12 @@ class CommandHandler {
     const command = await args.shift().toLowerCase();
 
     try {
-      await this.commands.get(command).execute(bot, message, args);
+      for (const group of this.commandGroups) {
+        if (group.hasCommand(command)) {
+          await group.execute(command, bot, message, args);
+          return;
+        }
+      }
     } catch (error) {
       await console.error(error);
       //await message.channel.send('there was an error trying to execute that command!');

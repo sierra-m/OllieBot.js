@@ -1,8 +1,12 @@
-import fs from 'fs'
 import Discord from 'discord.js'
 import {prefix, token} from './config'
 import CommandHandler from './commandhandler'
-import "regenerator-runtime/runtime";
+import "regenerator-runtime/runtime"
+
+Discord.GuildMember.prototype.mention = function () {
+  if (this.nickname) return `<@!${this.id}>`;
+  return `<@${this.id}>`;
+};
 
 const bot = new Discord.Client();
 bot.commandHandler = new CommandHandler(prefix, ['fun', 'util']);
@@ -20,4 +24,8 @@ bot.on('message', async msg => {
   await bot.commandHandler.handle(bot, msg);
 });
 
-bot.login(token);
+try {
+  bot.login(token);
+} catch (e) {
+  bot.destroy();
+}

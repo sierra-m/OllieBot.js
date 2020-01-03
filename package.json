@@ -5,7 +5,10 @@
     "start": "node dist/app.js"
   },
   "dependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-proposal-private-methods": "^7.7.4",
     "@babel/polyfill": "^7.7.0",
+    "decorator-wrap": "^1.2.4",
     "discord.js": "^11.5.1",
     "regenerator-runtime": "^0.13.3"
   },
@@ -13,6 +16,7 @@
     "@babel/cli": "^7.7.5",
     "@babel/core": "^7.7.5",
     "@babel/plugin-proposal-decorators": "^7.7.4",
-    "@babel/preset-env": "^7.7.6"
+    "@babel/preset-env": "^7.7.6",
+    "babel-plugin-transform-function-bind": "^6.22.0"
   }
 }
