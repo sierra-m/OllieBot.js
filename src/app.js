@@ -1,15 +1,17 @@
 import Discord from 'discord.js'
 import {prefix, token} from './config'
 import CommandHandler from './commandhandler'
+import DiscordBot from './bot'
 import "regenerator-runtime/runtime"
 
+// why isn't this a core feature smh
 Discord.GuildMember.prototype.mention = function () {
   if (this.nickname) return `<@!${this.id}>`;
   return `<@${this.id}>`;
 };
 
-const bot = new Discord.Client();
-bot.commandHandler = new CommandHandler(prefix, ['fun', 'util']);
+const bot = new DiscordBot('Test Mode OllieBot', prefix);
+bot.loadCommands(['fun', 'util']);
 
 // handy random util
 Array.prototype.random = function () {
