@@ -1,20 +1,17 @@
-import fs from 'fs'
-import path from 'path'
-import Discord from 'discord.js'
+import DiscordBot from './bot'
 
 class CommandHandler {
-  constructor (prefix, groups) {
-    this.prefix = prefix;
+  constructor (groups: Array) {
     this.commandGroups = [];
     for (let group of groups) {
       const groupClass = require(`./commands/${group}.js`).default;
       this.commandGroups.push(new groupClass());
     }
   }
-  async handle (bot, message) {
-    if (!message.content.startsWith(this.prefix) || message.author.bot) return;
+  async handle (bot: DiscordBot, message) {
+    if (!message.content.startsWith(bot.prefix) || message.author.bot) return;
 
-    const args = await message.content.slice(this.prefix.length).split(/ +/);
+    const args = await message.content.slice(bot.prefix.length).split(/ +/, 11);
     const command = await args.shift().toLowerCase();
 
     try {
