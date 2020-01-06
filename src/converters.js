@@ -150,4 +150,14 @@ const matchEmoji = async (message, arg: String): Discord.Emoji | UnicodeEmoji =>
   return result;
 };
 
-export {matchMember, matchMessage, matchTextChannel, matchVoiceChannel, matchCategoryChannel, matchColor}
+export {
+  matchMember,
+  matchMessage,
+  matchTextChannel,
+  matchVoiceChannel,
+  matchCategoryChannel,
+  matchColor,
+  matchRole,
+  matchInvite,
+  matchEmoji
+}
