@@ -7,7 +7,7 @@ export default class CommandGroup {
    * @returns {boolean}
    */
   hasCommand (name) {
-    return (this.__proto__.commands.includes(name));
+    return this.__proto__.commands.includes(name) || (name in this.__proto__.aliases);
   }
 
   /**
@@ -29,7 +29,12 @@ export default class CommandGroup {
    */
   async execute (command, bot, message, args) {
     try {
-      await this[command](bot, message, args);
+      const foundOriginal = this.__proto__.aliases[command];
+      if (foundOriginal) {
+        await this[foundOriginal](bot, message, args);
+      } else {
+        await this[command](bot, message, args);
+      }
     } catch (error) {
       await console.error(error);
     }
