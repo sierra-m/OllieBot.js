@@ -11,14 +11,14 @@ const matchID = (arg) => arg.match(/([0-9]{15,21})$/);
 
 const matchMemberByName = async (guild, arg) => {
   let result = null;
-  if ('#' in arg) {
+  if (arg.includes('#')) {
     const parts = arg.split('#');
     // search by discriminator
     result = await guild.members.find(member => member.user.username === parts[0] && member.user.discriminator === parts[1]);
   } else {
     // search members collection for username
     result = await guild.members.find(member => arg === member.user.username);
-    if (result.length < 1) {
+    if (!result) {
       // search by nickname
       result = await guild.members.find(member => arg === member.nickname)
     }

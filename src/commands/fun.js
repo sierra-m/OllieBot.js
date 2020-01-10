@@ -1,18 +1,21 @@
 import CommandGroup from '../util/group'
 import command from '../decorators/command'
 import help from '../decorators/help'
-import extract from '../decorators/extract'
 import aliases from '../decorators/aliases'
 import ownerOnly from '../decorators/owner-only'
 
 export default class Fun extends CommandGroup {
-  @command
+  constructor () {
+    super();
+  }
+
   @help({
     tagline: `Tell OllieBot he's good`,
     usage: ['good [optional:noun]'],
     description: `Tell OllieBot he's good`,
     examples: ['good bot']
   })
+  @command()
   async good (bot, message, args) {
     if (args && args[0] === 'bot') {
       await message.channel.send('good human');
@@ -21,7 +24,6 @@ export default class Fun extends CommandGroup {
     }
   }
 
-  @command
   @help({
     tagline: `Get one or *even two* members`,
     usage: ['getmember [member1] [member2:optional] '],
@@ -30,7 +32,7 @@ export default class Fun extends CommandGroup {
   })
   @aliases(['getmembers', 'get_members'])
   @ownerOnly
-  @extract('getmember {member} {member}')
+  @command('{member} {member}')
   async getmember (bot, message, args, member1, member2) {
     if (member1 && member2) {
       await message.channel.send(`Received members ${member1.mention} and ${member2.mention}`)

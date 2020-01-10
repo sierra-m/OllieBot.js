@@ -3,13 +3,14 @@ import command from '../decorators/command'
 import help from '../decorators/help'
 
 export default class Util extends CommandGroup {
-  @command
+
   @help({
     tagline: `Clears a number of bot messages`,
     usage: ['clear <number>'],
     description: `Clears a number of bot messages. Limit is 20.`,
     examples: ['clear 5']
   })
+  @command()
   async clear (bot, message, args) {
     const member = message.guild.member(message.author);
     if (!member.hasPermission('MANAGE_MESSAGES')) {
