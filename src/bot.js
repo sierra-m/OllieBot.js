@@ -1,8 +1,10 @@
 import Discord from 'discord.js'
 import CommandHandler from './commandhandler'
+import ConduitInterface from './util/conduit-interface'
 
-export default class DiscordBot {
+export default class DiscordBot { //extends ConduitInterface {
   constructor (name: string, prefix: string, ownerID: string, options?: Object) {
+    //super();
     this.client = new Discord.Client(options);
     this.name = name;
     this.prefix = prefix;
