@@ -23,51 +23,68 @@
 */
 
 import {wrap} from 'decorator-wrap'
-import StorageConduit from './storage'
+import StorageInterface from './storage'
 import {databasePath} from '../config'
 
-const conduit = new StorageConduit(databasePath);
+const storage = new StorageInterface(databasePath);
 
-function access (path, conduit: StorageConduit) {
-  const stmt = conduit.prepare(path);
+function access (path) {
+  const stmt = storage.prepare(path);
   return function (callback, args, name, type) {
     args.push(stmt);
     return callback();
   }
 }
 
-function update (path, conduit: StorageConduit, transactFunc=null) {
-  const stmt = conduit.prepare(path);
+function accessMany (stmts: Object) {
+  for (let prop in stmts) {
+    stmts[prop][0] = storage.prepare(stmts[prop][0]);
+  }
+  return function (callback, args, name, type) {
+    const results = {};
+    for (let prop in stmts) {
+      const stmt = stmts[prop][0];
+      results[prop] = stmt.get(...stmts[prop].slice(1));
+    }
+    args.push(results);
+    return callback();
+  }
+}
+
+function update (path, transactFunc=null) {
+  const stmt = storage.prepare(path);
   let transaction;
   if (transactFunc) {
-    transaction = conduit.transaction(transactFunc);
+    transaction = storage.transaction(transactFunc);
   }
   return function (callback, args, name, type) {
     args.push(stmt);
     if (transaction) args.push(transaction);
-    conduit.beginSave();
+    storage.beginSave();
     const result = callback();
-    conduit.endSave();
+    storage.endSave();
     return result;
   }
 }
 
-export default class ConduitInterface {
+export default class Conduit {
   constructor () {}
 
-  conduit = conduit;
-
-  access (path) {
-    const conduit = this.conduit;
+  static access (path) {
     return function (target, key, descriptor) {
-      return wrap(access(path, conduit))(target, key, descriptor);
+      return wrap(access(path))(target, key, descriptor);
     }
   }
 
-  update (path, transactFunc=null) {
-    const conduit = this.conduit;
+  static accessMany (stmts) {
     return function (target, key, descriptor) {
-      return wrap(update(path, conduit, transactFunc))(target, key, descriptor);
+      return wrap(accessMany(stmts))(target, key, descriptor);
+    }
+  }
+
+  static update (path, transactFunc=null) {
+    return function (target, key, descriptor) {
+      return wrap(update(path, transactFunc))(target, key, descriptor);
     }
   }
 }

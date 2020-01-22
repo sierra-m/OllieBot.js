@@ -1,0 +1,79 @@
+/*
+* The MIT License (MIT)
+*
+* Copyright (c) 2020 Sierra MacLeod
+*
+* Permission is hereby granted, free of charge, to any person obtaining a
+* copy of this software and associated documentation files (the "Software"),
+* to deal in the Software without restriction, including without limitation
+* the rights to use, copy, modify, merge, publish, distribute, sublicense,
+* and/or sell copies of the Software, and to permit persons to whom the
+* Software is furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+* DEALINGS IN THE SOFTWARE.
+*/
+
+import Discord from 'discord.js'
+import CommandHandler from '../commandhandler'
+import Conduit from '../util/conduit'
+
+export default class DiscordBot {
+  #prefix;
+  #status;
+
+  constructor (name: string, prefix: string, ownerID: string, options?: Object) {
+    //super();
+    this.client = new Discord.Client(options);
+    this.name = name;
+    //this.loadPrefix();
+    this.commandHandler = null;
+    this.ownerID = ownerID;
+  }
+
+  set prefix (newPrefix) {
+    this.#prefix = newPrefix;
+    this.setPrefix(newPrefix);
+  }
+
+  get prefix () {
+    return this.#prefix;
+  }
+
+  @Conduit.access('select * from bot limit 1')
+  loadBotData (stmt) {
+    const found = stmt.get();
+    this.#prefix = found.prefix;
+    this.#status = found.status;
+  }
+
+  @Conduit.update('update bot set prefix=? where id=?')
+  setPrefix (newPrefix, stmt) {
+    stmt.run(newPrefix, this.client.user.id);
+  }
+
+  @Conduit.update('update bot set prefix=? where id=?')
+  setStatus (newStatus, stmt) {
+    stmt.run(newStatus, this.client.user.id);
+  }
+
+  loadCommands (groupNames: Array) {
+    this.commandHandler = new CommandHandler(groupNames)
+  }
+
+  async login (token) {
+    return await this.client.login(token);
+  }
+
+  async logout () {
+    return await this.client.destroy();
+  }
+}

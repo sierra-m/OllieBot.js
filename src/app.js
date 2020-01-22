@@ -24,7 +24,7 @@
 
 import Discord from 'discord.js'
 import {prefix, token} from './config'
-import DiscordBot from './bot'
+import DiscordBot from './core/bot'
 import "regenerator-runtime/runtime"
 
 // why isn't this a core feature smh
@@ -45,13 +45,17 @@ Object.defineProperty(Discord.User.prototype, "mention", {
   }
 });
 
-const bot = new DiscordBot('Test Mode OllieBot', prefix, '305407800778162178');
-bot.loadCommands(['fun', 'util', 'admin']);
-
 // handy random util
 Array.prototype.random = function () {
   return this[Math.floor((Math.random()*this.length))];
 };
+
+Array.prototype.remove = function (item) {
+  return this.filter(i => i !== item);
+};
+
+const bot = new DiscordBot('Test Mode OllieBot', prefix, '305407800778162178');
+bot.loadCommands(['fun', 'util', 'admin']);
 
 bot.client.on('ready', () => {
   console.log(`Logged in as ${bot.client.user.tag}!`);

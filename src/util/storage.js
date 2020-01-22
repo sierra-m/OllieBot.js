@@ -24,7 +24,7 @@
 
 import Database from 'better-sqlite3'
 
-export default class StorageConduit {
+export default class StorageInterface {
   constructor (dbFilepath: string) {
     this.db = new Database(dbFilepath, { verbose: console.log });
     this.saveInProgress = false;

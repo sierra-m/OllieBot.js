@@ -21,30 +21,21 @@
 * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 * DEALINGS IN THE SOFTWARE.
 */
+ 
+import wrap from './async-wrap'
+import DiscordBot from "../core/bot";
 
-import Discord from 'discord.js'
-import CommandHandler from './commandhandler'
-import ConduitInterface from './util/conduit-interface'
+async function guildOnly (callback, args, name, type) {
+  const message = args[1];
 
-export default class DiscordBot { //extends ConduitInterface {
-  constructor (name: string, prefix: string, ownerID: string, options?: Object) {
-    //super();
-    this.client = new Discord.Client(options);
-    this.name = name;
-    this.prefix = prefix;
-    this.commandHandler = null;
-    this.ownerID = ownerID;
+  if (message.guild) {
+    await callback();
+  } else {
+    const m = await message.channel.send(`I'm afraid this command must be run in a guild.`);
+    await m.delete(4000);
   }
+}
 
-  loadCommands (groupNames: Array) {
-    this.commandHandler = new CommandHandler(groupNames)
-  }
-
-  async login (token) {
-    return await this.client.login(token);
-  }
-
-  async logout () {
-    return await this.client.destroy();
-  }
+export default function (target, key, descriptor) {
+  return wrap(guildOnly)(target, key, descriptor);
 }

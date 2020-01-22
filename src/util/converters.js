@@ -24,8 +24,8 @@
 * Methods inspired by https://github.com/Rapptz/discord.py/blob/master/discord/ext/commands/converter.py
 */
 import Discord from 'discord.js'
-import Color from './util/color'
-import UnicodeEmoji from './util/emoji'
+import Color from './color'
+import UnicodeEmoji from './emoji'
 
 // matches a user id
 const matchID = (arg) => arg.match(/([0-9]{15,21})$/);

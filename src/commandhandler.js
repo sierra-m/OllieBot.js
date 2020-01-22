@@ -22,7 +22,7 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
-import DiscordBot from './bot'
+import DiscordBot from './core/bot'
 
 class CommandHandler {
   constructor (groups: Array) {

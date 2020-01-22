@@ -23,7 +23,7 @@
 */
 
 import wrap from './async-wrap'
-import DiscordBot from "../bot";
+import DiscordBot from "../core/bot";
 
 async function ownerOnly (callback, args, name, type) {
   const bot: DiscordBot = args[0];

@@ -33,8 +33,8 @@ import {
   matchInvite,
   matchColor,
   matchRole
-} from "../converters"
-import DiscordBot from '../bot'
+} from "../util/converters"
+import DiscordBot from '../core/bot'
 
 const extract = (pattern, strict=false) => {
   // extract {type} statements from pattern
