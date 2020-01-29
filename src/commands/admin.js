@@ -22,17 +22,37 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
+import Discord from 'discord.js'
 import CommandGroup from '../util/group'
 import command from '../decorators/command'
 import help from '../decorators/help'
 import aliases from '../decorators/aliases'
 import ownerOnly from '../decorators/owner-only'
+import guild from "../core/guild";
 
 export default class Admin extends CommandGroup {
   @ownerOnly
   @command('{string}')
   async prefix (bot, message, args, newPrefix) {
-    bot.prefix = newPrefix;
+    bot.setPrefix(newPrefix);
     await message.channel.send(`Updated prefix to ${newPrefix}`);
+  }
+
+  @ownerOnly
+  @command()
+  async listguilds (bot, message: Discord.Message, args) {
+    const guildIDs = bot.guildData.map(data => data.id);
+
+    let out = `I have guild IDs **${guildIDs.join(', ')}**\n`;
+    const guildNames = [];
+    for (let id of guildIDs) {
+      const found = bot.client.guilds.get(id);
+      if (found) {
+        guildNames.push(found.name);
+      }
+    }
+    out += `These correspond to the client-cached server names **${guildNames.join(', ')}**`;
+
+    await message.channel.send(out);
   }
 }

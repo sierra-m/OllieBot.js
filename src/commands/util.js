@@ -61,4 +61,6 @@ export default class Util extends CommandGroup {
       await message.channel.send('Please supply a number to delete.')
     }
   }
+
+
 }
