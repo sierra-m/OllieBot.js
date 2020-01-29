@@ -91,7 +91,7 @@ const extract = (pattern, strict=false) => {
         break;
       case 'group':
         // same as string, but separate for emphasis
-        extractors.push(arg => arg);
+        extractors.push((message, arg) => arg);
         break;
       default:
         throw Error(`No extraction pattern of type "${p}" exists`)

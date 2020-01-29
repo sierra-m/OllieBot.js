@@ -7,6 +7,7 @@ import {Statement} from '../typedefs/statement'
 type GuildOptions = Object;
 
 export default class GuildData {
+  id;
   joinChannel;
   joinMessage;
   leaveChannel;
@@ -70,7 +71,7 @@ export default class GuildData {
     )
   }
 
-  @Conduit.access('select role_id from mode_roles where guild_id=?')
+  @Conduit.access('select role_id from mod_roles where guild_id=?')
   loadModRoles (stmt: Statement) {
     const rows : Array = stmt.all(this.id);
     this.modRoles = rows.map(data => data.role_id);
@@ -165,7 +166,7 @@ export default class GuildData {
     const rows : Array = stmt.all(this.id);
     this.rateLimits = new Discord.Collection();
     rows.map(data => {
-      this.rateLimits[data.command] = new RateLimit(this.id, data.command, data.minutes);
+      this.rateLimits.set(data.command, new RateLimit(this.id, data.command, data.minutes));
     });
   }
 
@@ -174,7 +175,7 @@ export default class GuildData {
     if (this.rateLimits.has(command)) {
       throw new ExistenceError(`Command '${command}' already has a rate limit`)
     }
-    this.rateLimits[command] = new RateLimit(this.id, command, minutes);
+    this.rateLimits.set(command, new RateLimit(this.id, command, minutes));
     stmt.run(this.id, command, minutes);
   }
 

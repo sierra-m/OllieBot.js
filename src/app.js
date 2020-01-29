@@ -54,7 +54,7 @@ Array.prototype.remove = function (item) {
   return this.filter(i => i !== item);
 };
 
-const bot = new DiscordBot('Test Mode OllieBot', prefix, '305407800778162178');
+const bot = new DiscordBot('Test Mode OllieBot', '305407800778162178');
 bot.loadCommands(['fun', 'util', 'admin']);
 
 bot.client.on('ready', () => {

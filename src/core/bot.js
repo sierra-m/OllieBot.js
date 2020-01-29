@@ -25,43 +25,47 @@
 import Discord from 'discord.js'
 import CommandHandler from '../commandhandler'
 import Conduit from '../util/conduit'
+import GuildData from './guild'
 
 export default class DiscordBot {
-  #prefix;
-  #status;
+  prefix;
+  status;
+  guildData;
 
-  constructor (name: string, prefix: string, ownerID: string, options?: Object) {
-    //super();
+  constructor (name: string, ownerID: string, options?: Object) {
     this.client = new Discord.Client(options);
     this.name = name;
-    //this.loadPrefix();
     this.commandHandler = null;
     this.ownerID = ownerID;
-  }
-
-  set prefix (newPrefix) {
-    this.#prefix = newPrefix;
-    this.setPrefix(newPrefix);
-  }
-
-  get prefix () {
-    return this.#prefix;
+    this.guildData = new Discord.Collection();
+    this.loadBotData();
+    this.loadGuildData();
   }
 
   @Conduit.access('select * from bot limit 1')
   loadBotData (stmt) {
     const found = stmt.get();
-    this.#prefix = found.prefix;
-    this.#status = found.status;
+    this.prefix = found.prefix;
+    this.status = found.status;
+  }
+
+  @Conduit.access('select id from guild')
+  loadGuildData (stmt) {
+    const rows = stmt.all();
+    for (let data of rows) {
+      this.guildData.set(data.id, new GuildData(data.id));
+    }
   }
 
   @Conduit.update('update bot set prefix=? where id=?')
   setPrefix (newPrefix, stmt) {
+    this.prefix = newPrefix;
     stmt.run(newPrefix, this.client.user.id);
   }
 
   @Conduit.update('update bot set prefix=? where id=?')
   setStatus (newStatus, stmt) {
+    this.status = newStatus;
     stmt.run(newStatus, this.client.user.id);
   }
 
