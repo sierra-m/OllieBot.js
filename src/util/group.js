@@ -21,6 +21,7 @@
 * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 * DEALINGS IN THE SOFTWARE.
 */
+import HelpDescriptor from '../util/help'
 
 export default class CommandGroup {
   constructor () {}
@@ -30,7 +31,7 @@ export default class CommandGroup {
    * @param name
    * @returns {boolean}
    */
-  hasCommand (name) {
+  hasCommand (name: string) {
     return this.__proto__.commands.includes(name) || (name in this.__proto__.aliases);
   }
 
@@ -40,6 +41,36 @@ export default class CommandGroup {
    */
   getCommands () {
     return this.__proto__.commands;
+  }
+
+  getAliases (term: string): Array {
+    const command = this.resolveCommand(term);
+    const out = [];
+    for (let alias in this.__proto__.aliases) {
+      if (this.__proto__.aliases[alias] === command) out.push(alias);
+    }
+    if (out.length) return out;
+    return null;
+  }
+
+  resolveCommand (command) {
+    const foundOriginal = this.__proto__.aliases[command];
+    if (foundOriginal) return foundOriginal;
+    return command;
+  }
+
+  searchHelp (term: string): HelpDescriptor {
+    if (this.__proto__.commandHelp) {
+      const found = this.resolveCommand(term);
+      if (found) {
+        return this.__proto__.commandHelp[found]
+      }
+    }
+    return null;
+  }
+
+  getHelp () {
+    return this.__proto__.commandHelp;
   }
 
   /**

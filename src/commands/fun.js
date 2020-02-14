@@ -144,7 +144,7 @@ export default class Fun extends CommandGroup {
   @help({
     tagline: `Searches Wikipedia for a term`,
     usage: ['wiki [query]'],
-    description: `\`Searches Wikipedia for a term. ` +
+    description: `Searches Wikipedia for a term. ` +
       `This method is case insensitive`,
     examples: [
       'wiki OllieBot is a good boy',

@@ -56,6 +56,7 @@ Array.prototype.remove = function (item) {
 
 const bot = new DiscordBot('Test Mode OllieBot', '305407800778162178');
 bot.loadCommands(['fun', 'util', 'admin']);
+bot.loadHelp();
 
 bot.client.on('ready', () => {
   console.log(`Logged in as ${bot.client.user.tag}!`);

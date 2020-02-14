@@ -26,6 +26,7 @@ import Discord from 'discord.js'
 import CommandHandler from '../commandhandler'
 import Conduit from '../util/conduit'
 import GuildData from './guild'
+import help from '../commands/help'
 
 export default class DiscordBot {
   prefix;
@@ -71,6 +72,12 @@ export default class DiscordBot {
 
   loadCommands (groupNames: Array) {
     this.commandHandler = new CommandHandler(groupNames)
+  }
+
+  loadHelp () {
+    // create help object and pass bot for setup
+    const group = new help(this);
+    this.commandHandler.addGroup(group);
   }
 
   async login (token) {

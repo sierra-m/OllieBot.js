@@ -25,14 +25,20 @@
 import DiscordBot from './core/bot'
 
 class CommandHandler {
-  constructor (groups: Array) {
+  constructor (groups: Array<Class>) {
     this.commandGroups = [];
     for (let group of groups) {
       const groupClass = require(`./commands/${group}.js`).default;
       this.commandGroups.push(new groupClass());
     }
   }
+
+  addGroup (group: Object) {
+    this.commandGroups.push(group)
+  }
+
   async handle (bot: DiscordBot, message) {
+    //console.log(`Groups: ${this.commandGroups.map(x => x.constructor.name)}`);
     if (!message.content.startsWith(bot.prefix) || message.author.bot) return;
 
     const args = await message.content.slice(bot.prefix.length).split(/ +/, 11);
