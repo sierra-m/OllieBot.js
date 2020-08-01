@@ -35,8 +35,16 @@ import {
   matchRole
 } from "../util/converters"
 import DiscordBot from '../core/bot'
+import {sleep} from '../util/tools'
 
-const extract = (pattern, strict=false) => {
+/**
+ *
+ * @param pattern string
+ * @param strict boolean
+ * @param removeQuotes boolean
+ * @returns {Function}
+ */
+const extractArgs = (pattern, strict=false, removeQuotes=true) => {
   // extract {type} statements from pattern
   const subpatterns = pattern.toLowerCase().match(/{([a-z]+)}/g);
   // begin pattern with a search for command - must be standard alphabet chars
@@ -127,7 +135,10 @@ const extract = (pattern, strict=false) => {
       // if not strict then call it anyway
       if (!strict) {
         await callback();
+        return;
       }
+      const sent = await message.channel.send(`Invalid use of \`${name}\` 😕`);
+      await sent.delete(2000);
       return;
     }
 
@@ -138,8 +149,10 @@ const extract = (pattern, strict=false) => {
     // So discard first 2 values
     command_args = command_args.slice(2);
 
-    // Args may have quotes, so strip them
-    command_args = command_args.map(text => text.replace(/"/g, ''));
+    if (removeQuotes) {
+      // Args may have quotes, so strip them
+      command_args = command_args.map(text => text.replace(/"/g, ''));
+    }
 
     // Build new extraction object
     //const extraction = new Extraction(command_args, subpatterns);
@@ -157,16 +170,42 @@ const extract = (pattern, strict=false) => {
   }
 };
 
-export default function(pattern, strict=false) {
+/**
+ * Command package
+ * @param pattern string
+ * @param strict boolean
+ * @param removeQuotes boolean
+ * @param subcommand boolean
+ * @returns {Function}
+ */
+export default function(pattern, strict=false, removeQuotes=true, subcommand=false) {
   return function (target, key, descriptor) {
     if (target.commands === undefined) target.commands = [];
     if (target.aliases === undefined) target.aliases = {};
-    // register this function as a command
-    target.commands.push(key);
+    if (target.subcommands === undefined) target.subcommands = {};
+    // register this function as a command if not subcommand
+    if (!subcommand) {
+      target.commands.push(key);
+    }
 
     // If pattern present then wrap it in an extract
     if (pattern) {
-      return wrap(extract(pattern, strict))(target, key, descriptor);
+      return wrap(extractArgs(pattern, strict, removeQuotes))(target, key, descriptor);
     }
   }
 }
+
+/**
+ * Extract package
+ * @param pattern
+ * @param strict
+ * @param removeQuotes
+ * @returns {function(*=, *=, *=): function(...[*]=): Promise<*>}
+ */
+function extract (pattern, strict=false, removeQuotes=true) {
+  return function (target, key, descriptor) {
+    return wrap(extractArgs(pattern, strict, removeQuotes))(target, key, descriptor);
+  }
+}
+
+export {extract}

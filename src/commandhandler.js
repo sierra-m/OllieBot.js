@@ -39,7 +39,12 @@ class CommandHandler {
 
   async handle (bot: DiscordBot, message) {
     //console.log(`Groups: ${this.commandGroups.map(x => x.constructor.name)}`);
-    if (!message.content.startsWith(bot.prefix) || message.author.bot) return;
+    if (message.author.bot) return;
+
+    const guildData = await bot.fetchGuildData(message.guild);
+    await guildData.responseLib.execute(bot, message);
+
+    if (!message.content.startsWith(bot.prefix)) return;
 
     const args = await message.content.slice(bot.prefix.length).split(/ +/, 11);
     const command = await args.shift().toLowerCase();
@@ -47,7 +52,12 @@ class CommandHandler {
     try {
       for (const group of this.commandGroups) {
         if (group.hasCommand(command)) {
-          await group.execute(command, bot, message, args);
+          if (args.length > 0 && group.hasSubcommand(command, args[0])) {
+            const subcommand = args.shift();
+            await group.executeSub(subcommand, bot, message, args);
+          } else {
+            await group.execute(command, bot, message, args);
+          }
           return;
         }
       }

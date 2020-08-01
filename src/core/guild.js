@@ -3,6 +3,7 @@ import Discord from 'discord.js'
 import RateLimit from '../util/rate-limit'
 import {ExistenceError} from '../util/errors'
 import {Statement} from '../typedefs/statement'
+import {ResponseLibrary} from '../util/responses';
 
 type GuildOptions = Object;
 
@@ -23,6 +24,7 @@ export default class GuildData {
 
   constructor (id: String, options: GuildOptions = null) {
     this.id = id;
+    this.responseLib = new ResponseLibrary(id);
 
     if (options) {
       this.joinChannel = options.joinChannel;
@@ -38,6 +40,7 @@ export default class GuildData {
       this.loadData();
       this.loadModRoles();
       this.loadBlockedCommands();
+      this.responseLib.load();
       this.#created = true;
     }
   }
@@ -189,10 +192,10 @@ export default class GuildData {
   }
 
   hasModeRole (role: Discord.Snowflake) {
-    return role in this.modRoles;
+    return this.modRoles.includes(role);
   }
 
   isBlocked (command: String) {
-    return command in this.blockedCommands;
+    return this.blockedCommands.includes(command);
   }
 }

@@ -26,10 +26,7 @@ import Discord from 'discord.js'
 import CommandGroup from '../util/group'
 import command from '../decorators/command'
 import Paginator, {InfoPage, Pages} from "../util/paginator";
-import {timeout} from "../util/tools";
-
-// ordered regional indicator numbers
-const orderedNumerics = ['1⃣', '2⃣', '3⃣', '4⃣', '5⃣', '6⃣', '7⃣', '8⃣', '9⃣', '🔟'];
+import {sleep, orderedNumerics} from "../util/tools";
 
 const helpIcon = 'https://abs.twimg.com/emoji/v2/72x72/2753.png';
 
@@ -80,7 +77,7 @@ export default class Help extends CommandGroup {
       }
     }
 
-    this.helpPages = new Pages(this.helpItems, 4);
+    this.helpPages = new Pages(this.helpItems, 6);
     this.paginator = new Paginator(this.helpPages, 'Help', helpIcon, '#00ff00');
     this.paginator.addInfoPage(commandInfo, 'ℹ️')
   }
@@ -96,7 +93,7 @@ export default class Help extends CommandGroup {
     let currentMessage = await message.author.send(currentPage);
     for (let emoji of reactionButtons) {
       await currentMessage.react(emoji);
-      //await timeout(200);
+      //await sleep(200);
     }
     try {
       while (true) {
@@ -150,7 +147,7 @@ export default class Help extends CommandGroup {
           __**Examples**__
           ${found.examples.map(text => `\`${text}\``).join('\n')}
           ${(aliases && `\n__Aliases__\n${aliases.join(', ')}`) || ''}`
-            .replace(/{mention}/g, message.author.mention);
+            .replace(/{mention}/g, `@OllieBot`);
 
           const em = new Discord.RichEmbed()
             .setColor('#00ff00')

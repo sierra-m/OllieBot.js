@@ -54,8 +54,12 @@ Array.prototype.remove = function (item) {
   return this.filter(i => i !== item);
 };
 
+String.prototype.capitalize = function() {
+  return this.charAt(0).toUpperCase() + this.slice(1);
+}
+
 const bot = new DiscordBot('Test Mode OllieBot', '305407800778162178');
-bot.loadCommands(['fun', 'util', 'admin']);
+bot.loadCommands(['fun', 'util', 'admin', 'reactions', 'response']);
 bot.loadHelp();
 
 bot.client.on('ready', () => {

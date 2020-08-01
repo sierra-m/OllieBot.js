@@ -1,3 +1,5 @@
 class ExistenceError extends Error {}
 
-export {ExistenceError}
+class APIError extends Error {}
+
+export {ExistenceError, APIError}

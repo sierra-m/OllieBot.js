@@ -59,6 +59,13 @@ export default class CommandGroup {
     return command;
   }
 
+  hasSubcommand (command, subcommand) {
+    if (command in this.__proto__.subcommands) {
+      if (this.__proto__.subcommands[command].includes(subcommand)) return true;
+    }
+    return false;
+  }
+
   searchHelp (term: string): HelpDescriptor {
     if (this.__proto__.commandHelp) {
       const found = this.resolveCommand(term);
@@ -91,6 +98,23 @@ export default class CommandGroup {
         await this[command](bot, message, args);
       }
     } catch (error) {
+      await console.error(error);
+    }
+  }
+
+  /**
+   * Execute a subcommand. Does not check if requested subcommand
+   * exists, this must be done with `hasSubcommand`
+   * @param subcommand
+   * @param bot
+   * @param message
+   * @param args
+   * @returns {Promise<void>}
+   */
+  async executeSub (subcommand, bot, message, args) {
+    try {
+      await this[subcommand](bot, message, args);
+    } catch (e) {
       await console.error(error);
     }
   }
