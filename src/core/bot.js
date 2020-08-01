@@ -27,18 +27,21 @@ import CommandHandler from '../commandhandler'
 import Conduit from '../util/conduit'
 import GuildData from './guild'
 import help from '../commands/help'
+import Reactions from '../util/reactions'
 
 export default class DiscordBot {
   prefix;
   status;
-  guildData;
+  guilds;
 
   constructor (name: string, ownerID: string, options?: Object) {
     this.client = new Discord.Client(options);
     this.name = name;
     this.commandHandler = null;
     this.ownerID = ownerID;
-    this.guildData = new Discord.Collection();
+    this.guilds = new Discord.Collection();
+    this.reactions = new Reactions();
+    this.reactions.load();
     this.loadBotData();
     this.loadGuildData();
   }
@@ -54,7 +57,7 @@ export default class DiscordBot {
   loadGuildData (stmt) {
     const rows = stmt.all();
     for (let data of rows) {
-      this.guildData.set(data.id, new GuildData(data.id));
+      this.guilds.set(data.id, new GuildData(data.id));
     }
   }
 
@@ -86,5 +89,21 @@ export default class DiscordBot {
 
   async logout () {
     return await this.client.destroy();
+  }
+
+  async fetchGuildData (guild: Discord.Guild) : GuildData {
+    return await this.guilds.get(guild.id)
+  }
+  
+  async checkMod (member: Discord.GuildMember) {
+    const guildData = await this.fetchGuildData(member.guild);
+
+    if (member.id === member.guild.owner.id) return true;
+    if (member.id === this.ownerID) return true;
+    if (member.hasPermission("ADMINISTRATOR")) return true;
+    for (let role of member.roles.keys()) {
+      if (guildData.hasModeRole(role)) return true;
+    }
+    return false;
   }
 }

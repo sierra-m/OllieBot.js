@@ -29,7 +29,7 @@ import help from '../decorators/help'
 import aliases from '../decorators/aliases'
 import guildOnly from '../decorators/guild-only'
 import subcommand from '../decorators/subcommand'
-import {extract} from "../decorators/command";
+import modOnly from '../decorators/mod-only'
 import {orderedNumerics} from "../util/tools";
 import Paginator, {Pages} from "../util/paginator";
 
@@ -39,17 +39,20 @@ export default class ResponseGroup extends CommandGroup {
 
   @help({
     tagline: `Manage custom responses`,
-    usage: ['response list', 'response add', 'response remove'],
+    usage: ['response list', 'response add', 'response remove', 'response edit'],
     description: `Get a hug for yourself or give one to someone else :blush:`,
     examples: ['hug', 'hug {mention}']
   })
   @aliases(['responses'])
   @guildOnly
+  @modOnly
   @command()
   async response (bot, message, args) {
     await message.channel.send(`You've reached the generic response answer`)
   }
 
+  @guildOnly
+  @modOnly
   @subcommand('response')
   async list(bot, message, args) {
     const guildData = await bot.fetchGuildData(message.guild);
