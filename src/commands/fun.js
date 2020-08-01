@@ -23,14 +23,21 @@
 */
 import Discord from 'discord.js'
 import wikiAPI from '../apis/wiki'
+import StrawPoll from '../apis/strawpoll'
 
 import CommandGroup from '../util/group'
 import command from '../decorators/command'
 import help from '../decorators/help'
 import aliases from '../decorators/aliases'
 import ownerOnly from '../decorators/owner-only'
+import moment from 'moment'
+import fetch from 'node-fetch'
 
 import {ResolvedPage} from '../typedefs/resolved-page'
+import guildOnly from '../decorators/guild-only'
+import {sleep, bind} from '../util/tools'
+
+import * as emojiAlphabet from '../resources/emojiAlphabet.json'
 
 const numToRegional = {
   '0': '0⃣',
@@ -45,6 +52,20 @@ const numToRegional = {
   '9': '9⃣'
 };
 
+const statusColors = {
+  online: '#43b581',
+  idle: '#faa61a',
+  offline: '#747f8d',
+  dnd: '#f04747'
+};
+
+const statusTypes = {
+  0: 'Playing',
+  1: 'Streaming',
+  2: 'Listening',
+  3: 'Watching'
+};
+
 export default class Fun extends CommandGroup {
   constructor () {
     super();
@@ -52,7 +73,7 @@ export default class Fun extends CommandGroup {
 
   @help({
     tagline: `Tell OllieBot he's good`,
-    usage: ['good [optional:noun]'],
+    usage: ['good (optional: [noun])'],
     description: `Tell OllieBot he's good`,
     examples: ['good bot']
   })
@@ -67,7 +88,7 @@ export default class Fun extends CommandGroup {
 
   @help({
     tagline: `Tell OllieBot he's bad 🙁`,
-    usage: ['bad [optional:noun]'],
+    usage: ['bad (optional: [noun])'],
     description: `Tell OllieBot he's bad 🙁`,
     examples: ['bad bot']
   })
@@ -108,7 +129,7 @@ export default class Fun extends CommandGroup {
 
   @help({
     tagline: `Converts text into regional indicators`,
-    usage: ['bigtext <optional:copyable> [text]'],
+    usage: ['bigtext (optional: <copyable>) [text]'],
     description: `Converts \`text\` into regional indicators. ` +
     `This method is case insensitive.`,
     examples: [
@@ -147,8 +168,8 @@ export default class Fun extends CommandGroup {
     description: `Searches Wikipedia for a term. ` +
       `This method is case insensitive`,
     examples: [
-      'wiki OllieBot is a good boy',
-      'wiki copyable This text is copyable'
+      'wiki Discord',
+      'wiki Our Father Karl Marx'
     ]
   })
   @aliases(['wikipedia'])
@@ -173,6 +194,446 @@ export default class Fun extends CommandGroup {
       await sent.delete();
       await message.channel.send(`No matches for ${query}. Please be more specific :thinking:`);
     }
+  }
+
+  @help({
+    tagline: `See when a member joined the guild`,
+    usage: ['joined', 'joined [@member]'],
+    description: `See when a member joined the guild. ` +
+    `Calling without \`@member\` returns your own info.`,
+    examples: [
+      'joined',
+      'joined {mention}'
+    ]
+  })
+  @guildOnly
+  @command('{member}')
+  async joined (bot, message, args, member) {
+    if (!member) {
+      member = await message.guild.fetchMember(message.author);
+    }
+    const joinedAt = moment.utc(member.joinedTimestamp / 1000, 'X').format('MMMM Do[,] YYYY [at] HH:mm:ss');
+    const em = new Discord.RichEmbed()
+      .setDescription(`${member.displayName} joined ${message.guild.name} on ${joinedAt} UTC`)
+      .setColor('#00d114')
+      .setAuthor(member.user.username, member.user.avatarURL);
+    await message.channel.send(em);
+  }
+
+  @help({
+    tagline: `Display a user's info`,
+    usage: ['userinfo', 'userinfo [@user]'],
+    description: `Display a user's info. ` +
+      `Calling without \`@user\` returns your own info.`,
+    examples: [
+      'userinfo',
+      'userinfo {mention}'
+    ]
+  })
+  @guildOnly
+  @aliases(['user-info', 'user_info', 'usrinfo'])
+  @command('{member}')
+  async userinfo (bot, message, args, member) {
+    if (!member) {
+      member = await message.guild.fetchMember(message.author);
+    }
+    const joinedAt = await moment.utc(member.joinedTimestamp / 1000, 'X').format('MMMM Do[,] YYYY [at] HH:mm:ss [UTC]');
+    const createdAt = await moment.utc(member.user.createdTimestamp / 1000, 'X').format('MMMM Do[,] YYYY [at] HH:mm:ss [UTC]');
+
+    const em = new Discord.RichEmbed()
+      .setTitle('════╣User Info╠════\n\u200b')
+      .setAuthor(member.user.username, member.user.avatarURL)
+      .setThumbnail(member.user.avatarURL)
+      .setColor(statusColors[member.presence.status]);
+
+    if (message.guild.owner.id === member.id) em.addField('Owns this server.', '\u200b', false);
+    if (member.user.bot) em.addField('This user is a bot. (unlike me)', '\u200b', false);
+
+    em.addField(`Joined __${message.guild.name}__`, joinedAt, false);
+    em.addField('ID', member.id, false);
+    if (member.roles && member.roles.size > 1) {
+      // sorts them in reverse and removes first - "@everyone"
+      const roles = Array.from(member.roles.values());
+      await roles.sort((a, b) => b.position - a.position);
+      await roles.pop();
+      await em.addField('Roles', roles.map(r => r.name).join(', '), false);
+    } else {
+      em.addField('Roles', '*None*', false);
+    }
+    await em.addField('Status', member.presence.status.replace(/dnd$/, 'do not disturb').replace(/^\w/, c => c.toUpperCase()), false);
+    if (member.presence.status !== 'offline') {
+      if (member.presence.game.name === 'Custom Status') await em.addField('Presence', member.presence.game.state, false);
+      else await em.addField(statusTypes[member.presence.game.type], member.presence.game.name)
+    }
+    em.addField('Nickname', member.nickname || '*None*', false);
+    em.addField('Created', createdAt, false);
+
+    await message.channel.send(em);
+  }
+
+  @help({
+    tagline: `Roll N-sided dice`,
+    usage: ['roll [iterations] d [sides] (optional:<+/-> [value]) (optional: <adv/dis>)'],
+    description: `Roll N-sided dice. Whitespace is ignored.`,
+    examples: ['roll d20', 'roll 3d10', 'roll 69d69 +69', 'roll d20 +3 adv']
+  })
+  @aliases(['dice', 'diceroll'])
+  @command('{group}')
+  async roll (bot, message, args, input) {
+    const pattern = /(?<iters>[0-9]+)?d(?<sides>[0-9]+)(?<op>[\+\-])?(?<opnd>(?<=[\+\-])([0-9]+))?(?<favor>adv|dis)?/i;
+
+    input = input.replace(/ /g, '');  // replace spaces
+    const match = input.match(pattern);
+
+    if (match) {
+      // Sides must exist correctly
+      let sides = parseInt(match.groups['sides']);
+      let iters = parseInt(match.groups['iters']);
+      const operator = match.groups['op'];
+      let operand = parseInt(match.groups['opnd']);
+      const favor = match.groups['favor'];
+
+      // I'm not sorry about these
+      // They are perfection
+      sides = sides < 1 ? 1 : sides > 1000 ? 1000 : sides;
+      iters = !(iters > 1) ? 1 : iters > 250 ? 250 : iters;
+      operand = !(operand > 0) ? 0 : operand > 1000 ? 1000 : operand;
+
+      if (!!favor && iters === 1) iters = 2;
+
+      if (((sides.toString().length + 3) * iters) > 1024) {
+        iters = parseInt(1024 / (sides.toString().length + 3)) - 2;
+      }
+
+      // Make the rolls
+      const rolls = [];
+      for (let i = 0; i < iters; i++) {
+        rolls.push(Math.floor(Math.random()*sides) + 1);
+      }
+
+      // Determine subtotal
+      let subtotal = 0;
+      if (favor) {
+        // If favor, subtotal is a max or min of all rolls
+        if (favor === 'adv') subtotal = Math.max(...rolls);
+        else subtotal = Math.min(...rolls);
+      } else {
+        // Subtotal is sum
+        subtotal = rolls.reduce((a, b) => a + b, 0);
+      }
+
+      // Determine total with operator
+      let total = subtotal;
+      if (operator && operand) {
+        if (operator === '+') total += operand;
+        else total -= operand;
+      }
+
+      const em = new Discord.RichEmbed()
+        .setAuthor('Roll', 'http://moziru.com/images/dungeons-dragons-clipart-d20-12.jpg');
+
+      const favorVerbose = {
+        adv: ' with Advantage',
+        dis: ' with Disadvantage'
+      };
+      // Build display like d20 with Advantage
+      const displayRoll = `${iters === 1 || (iters === 2 && favor) ? '' : iters}d${sides}${!!favor ? favorVerbose[favor] : ''}`;
+
+      let joined = '';
+      if (favor) {
+        joined = rolls.join(' | ').replace(RegExp(`\\b${subtotal}\\b`, 'g'), ` **${subtotal}** `);
+      } else {
+        joined = `${rolls.join(' + ')} = **${subtotal}**`;
+      }
+      em.addField(displayRoll, joined, false);
+      //em.addBlankField();
+
+      if (operator && operand) {
+        em.addField('Modifier', `${operator} ${operand}`);
+        //em.addBlankField();
+      }
+
+      em.addField('Total', total.toString());
+
+      await message.channel.send(em);
+    }
+  }
+
+  @help({
+    tagline: `Fetch one to three bunnies`,
+    usage: ['bun', 'bun [number]'],
+    description: `Fetch a bunny, or pass a number 1-3 for several at once!!`,
+    examples: ['bun', 'bun 2']
+  })
+  @aliases(['bunny', 'rabbit', 'bunnies', 'rabbits'])
+  @command('{number}')
+  async bun (bot, message, args, bunnies) {
+    const getBunny = async ():Discord.RichEmbed => {
+      const result = await fetch('http://www.rabbit.org/fun/net-bunnies.html');
+      if (result.status !== 200) return null;
+      const raw = await result.text();
+      const match = await raw.match(/Show me another photo!<\/a><br>\n<img src="(?<link>[A-Za-z0-9:_\-+./]+)"/gi);
+
+      if (match) {
+        const link_match = match[0].match(/<img src="(?<link>[A-Za-z0-9:_\-+./]+)"/i);
+        return new Discord.RichEmbed()
+          .setColor('#5651ff')
+          .setImage(link_match.groups.link);
+      }
+      return null;
+    };
+
+    if (bunnies) {
+      bunnies = bind(bunnies, 1, 3);
+      for (let i = 0; i < bunnies; i++) {
+        const em = await getBunny();
+        if (em) {
+          em.setTitle(`Bun ${i+1}`);
+          await message.channel.send(em);
+        } else {
+          await message.channel.send('Oh no! The server is having problems :(');
+          return
+        }
+        await sleep(100);
+      }
+
+    } else {
+      const em = await getBunny();
+      if (em) {
+        em.setTitle('Bun');
+        await message.channel.send(em);
+      } else {
+        await message.channel.send('Oh no! The server is having problems :(');
+      }
+    }
+  }
+
+  @help({
+    tagline: `Fetch one to three cats`,
+    usage: ['cat', 'cat [number]'],
+    description: `Fetch a kitty, or pass a number 1-3 for several at once!!`,
+    examples: ['cat', 'cat 3']
+  })
+  @aliases(['cats', 'kitty', 'kitties'])
+  @command('{number}')
+  async cat (bot, message, args, cats) {
+    const getCat = async ():Discord.RichEmbed => {
+      const result = await fetch('http://aws.random.cat/meow');
+      if (result.status !== 200) return null;
+      const payload = await result.json();
+
+      return new Discord.RichEmbed()
+        .setColor('#ff7500')
+        .setImage(payload.file);
+    };
+
+    if (cats) {
+      cats = bind(cats, 1, 3);
+      for (let i = 0; i < cats; i++) {
+        const em = await getCat();
+        if (em) {
+          em.setTitle(`Cat ${i+1}`);
+          await message.channel.send(em);
+        } else {
+          await message.channel.send('Oh no! The server is having problems :(');
+          return
+        }
+        await sleep(100);
+      }
+
+    } else {
+      const em = await getCat();
+      if (em) {
+        em.setTitle('Cat');
+        await message.channel.send(em);
+      } else {
+        await message.channel.send('Oh no! The server is having problems :(');
+      }
+    }
+  }
+
+  @help({
+    tagline: `Fetch one to three woofs`,
+    usage: ['woof', 'woof [number]'],
+    description: `Fetch a pupper, or pass a number 1-3 for several at once!!`,
+    examples: ['woof', 'woof 3']
+  })
+  @aliases(['woof', 'pupper', 'puppers'])
+  @command('{number}')
+  async woof (bot, message, args, woofs) {
+    const getWoof = async ():Discord.RichEmbed => {
+      const result = await fetch('https://random.dog/woof.json?include=jpg,png');
+      if (result.status !== 200) return null;
+      const payload = await result.json();
+
+      return new Discord.RichEmbed()
+        .setColor('#1dba3a')
+        .setImage(payload.url);
+    };
+
+    if (woofs) {
+      woofs = bind(woofs, 1, 3);
+      for (let i = 0; i < woofs; i++) {
+        const em = await getWoof();
+        if (em) {
+          em.setTitle(`Woof ${i+1}`);
+          await message.channel.send(em);
+        } else {
+          await message.channel.send('Oh no! The server is having problems :(');
+          return
+        }
+        await sleep(100);
+      }
+
+    } else {
+      const em = await getWoof();
+      if (em) {
+        em.setTitle('Woof');
+        await message.channel.send(em);
+      } else {
+        await message.channel.send('Oh no! The server is having problems :(');
+      }
+    }
+  }
+
+  // Guild-specific so won't have a public help
+  @command()
+  async late (bot, message, args) {
+    if (message.guild.id === '313841769441787907') return;
+
+    const duration = moment(moment().unix() + Math.random()*[100,10000,1000000].random(), 'X').fromNow();
+    await message.channel.send(`Shoe is now ${duration.substring(3)} late`)
+  }
+
+  @help({
+    tagline: `Make bigtext reactions to messages`,
+    usage: ['react [recent message #] [text]'],
+    description: `Make bigtext reactions to messages. 
+    Alternate emoji for most characters exist, but try to limit multiple occurrences of each character.
+    "recent message #" means relative message number in channel, with most recent being #1, etc.`,
+    examples: ['react 3 oof']
+  })
+  @aliases(['reaction'])
+  @command('{number} {group}', true)
+  async react (bot, message, args, num: number, text: string) {
+    if (num < 1) num = 1;
+    if (num > 30) num = 30;
+    const messageList = await message.channel.fetchMessages({limit: num+1});
+    await messageList.sort((a, b) => a.createdTimestamp - b.createdTimestamp);
+    const targetMessage = messageList.last();
+
+    const usedEmotes = [];
+    const failures = [];
+
+    const getKey = emoji => Object.keys(emojiAlphabet).find(key => emojiAlphabet[key].includes(emoji));
+
+    if (targetMessage.reactions.size) {
+      const emojis = targetMessage.reactions.map(x => x.emoji.name);
+      for (let emoji of emojis) {
+        // Unicode emoji have length 2
+        if (emoji.length === 2) {
+          usedEmotes.push(emoji);
+          const char = getKey(emoji);
+          text = text.substring(text.indexOf(char) + 1);
+        }
+      }
+    }
+
+    let skip = false;
+    const lower = text.toLowerCase();
+
+    for (let i = 0; i < text.length; i++) {
+      if (skip) {
+        skip = false;
+        continue;
+      }
+
+      const pair = lower.substr(i, 2);
+      if (pair.length === 2) {
+        if (pair in emojiAlphabet) {
+          const emoji = emojiAlphabet[pair][0];
+          if (!usedEmotes.includes(emoji)) {
+            try {
+              await targetMessage.react(emoji);
+            } catch (e) {
+              failures.push(pair)
+            }
+            usedEmotes.push(emoji);
+            skip = true;
+            continue;
+          }
+        }
+      }
+
+      const char = lower[i];
+      if (char in emojiAlphabet) {
+        for (let emoji of emojiAlphabet[char]) {
+          if (!usedEmotes.includes(emoji)) {
+            try {
+              await targetMessage.react(emoji);
+            } catch (e) {
+              failures.push(pair)
+            }
+            usedEmotes.push(emoji);
+            break;
+          }
+        }
+      }
+
+    }
+
+    const sent = await message.channel.send('✅');
+    await sent.delete(2000);
+  }
+
+  @help({
+    tagline: `create a strawpoll.me poll`,
+    usage: ['strawpoll [title] [option1] [option2] [optionN]...'],
+    description: `Creates a strawpoll.me poll based on arguments given.
+    Each poll must have a title and at least two options. To include spaces, wrap arguments in quotes.`,
+    examples: ['strawpoll "best animal" dog cat', 'strawpoll Choose mm/dd/yyyy dd/mm/yyyy yyyy/mm/dd']
+  })
+  @aliases(['poll'])
+  @command('{string} {group}', false, false)
+  async strawpoll (bot, message, args, title: string, optionsPred: string) {
+    title = title.replace(/"/g, '');
+
+    const tokens = optionsPred.match(/("[^"]+"|[^\s"]+)/g);
+
+    const options = tokens.map(token => token.replace(/"/g, ''));
+
+    const poll = new StrawPoll({title: title, options: options});
+
+    const success = await poll.create();
+
+    if (success) {
+      await message.channel.send(`http://www.strawpoll.me/${poll.id}`);
+    } else {
+      await message.channel.send('Straw Poll could not be created ¯\\_(ツ)_/¯');
+    }
+  }
+
+  @help({
+    tagline: `add some straya, nah yeah`,
+    usage: ['straya [text]'],
+    description: `Converts text to straya`,
+    examples: [`straya Let's throw some shrimp on the barbie`, 'straya yes']
+  })
+  @aliases(['aussie'])
+  @command('{group}')
+  async straya (bot, message, args, text: string) {
+    console.log(text);
+    text = text.replace(/yeah/g, 'yeah yeah')
+      .replace(/nah/g, 'nah nah')
+      .replace(/yes/g, 'nah yeah')
+      .replace(/no/g, 'yeah nah');
+
+    text = text.split(' ').map(word => {
+      if (!['yeah', 'nah'].includes(word)) return ['yeah', 'nah'].random();
+      return word;
+    }).join(' ');
+
+    await message.channel.send(text)
   }
 
   @help({
