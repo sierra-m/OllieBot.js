@@ -40,8 +40,8 @@ export default class ResponseGroup extends CommandGroup {
   @help({
     tagline: `Manage custom responses`,
     usage: ['response list', 'response add', 'response remove', 'response edit'],
-    description: `Get a hug for yourself or give one to someone else :blush:`,
-    examples: ['hug', 'hug {mention}']
+    description: `Add and manage custom bot responses.`,
+    examples: ['response list', 'response add cat "Please someone get me a cat I am desperate"']
   })
   @aliases(['responses'])
   @guildOnly
