@@ -22,6 +22,7 @@
 * DEALINGS IN THE SOFTWARE.
 */
 
+
 const colors = {
   default: 0x000000,
   white: 0xffffff,
@@ -79,5 +80,14 @@ export default class Color {
 
   getArray () {
     return [this.red, this.green, this.blue];
+  }
+
+  toString () {
+    return `#${this.value.toString(16)}`
+  }
+
+  static random = () => {
+    const val = Math.floor(Math.random() * Math.floor(0xffffff));
+    return new Color(val)
   }
 }

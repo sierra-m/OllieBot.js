@@ -12,6 +12,7 @@
     "decorator-wrap": "^1.2.4",
     "discord.js": "^11.5.1",
     "libsodium-wrappers": "^0.7.3",
+    "node-fetch": "^2.6.0",
     "regenerator-runtime": "^0.13.3",
     "wikijs": "^6.0.1"
   },
@@ -20,6 +21,7 @@
     "@babel/core": "^7.7.5",
     "@babel/plugin-proposal-decorators": "^7.7.4",
     "@babel/plugin-transform-flow-strip-types": "^7.7.4",
+    "@babel/plugin-transform-parameters": "^7.10.1",
     "@babel/preset-env": "^7.7.6",
     "@babel/preset-flow": "^7.8.3",
     "babel-plugin-transform-function-bind": "^6.22.0",

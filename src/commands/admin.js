@@ -28,6 +28,7 @@ import command from '../decorators/command'
 import help from '../decorators/help'
 import aliases from '../decorators/aliases'
 import ownerOnly from '../decorators/owner-only'
+import modOnly from '../decorators/mod-only'
 import guild from "../core/guild";
 
 export default class Admin extends CommandGroup {
@@ -41,7 +42,7 @@ export default class Admin extends CommandGroup {
   @ownerOnly
   @command()
   async listguilds (bot, message: Discord.Message, args) {
-    const guildIDs = bot.guildData.map(data => data.id);
+    const guildIDs = bot.guilds.map(data => data.id);
 
     let out = `I have guild IDs **${guildIDs.join(', ')}**\n`;
     const guildNames = [];
@@ -54,5 +55,11 @@ export default class Admin extends CommandGroup {
     out += `These correspond to the client-cached server names **${guildNames.join(', ')}**`;
 
     await message.channel.send(out);
+  }
+
+  @modOnly
+  @command()
+  async testmodonly (bot, message, args) {
+    await message.channel.send('It worked! You have permission :blush:');
   }
 }
