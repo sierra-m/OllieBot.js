@@ -622,7 +622,6 @@ export default class Fun extends CommandGroup {
   @aliases(['aussie'])
   @command('{group}')
   async straya (bot, message, args, text: string) {
-    console.log(text);
     text = text.replace(/yeah/g, 'yeah yeah')
       .replace(/nah/g, 'nah nah')
       .replace(/yes/g, 'nah yeah')

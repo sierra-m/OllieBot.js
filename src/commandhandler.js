@@ -41,8 +41,12 @@ class CommandHandler {
     //console.log(`Groups: ${this.commandGroups.map(x => x.constructor.name)}`);
     if (message.author.bot) return;
 
-    const guildData = await bot.fetchGuildData(message.guild);
-    await guildData.responseLib.execute(bot, message);
+    try {
+      const guildData = await bot.fetchGuildData(message.guild);
+      await guildData.responseLib.execute(bot, message);
+    } catch (e) {
+      await console.error(e);
+    }
 
     if (!message.content.startsWith(bot.prefix)) return;
 
