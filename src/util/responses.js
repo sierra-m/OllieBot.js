@@ -26,10 +26,12 @@ import Discord from "discord.js";
 import Conduit from './conduit'
 import Color from './color'
 import {getSafe} from './tools';
+import {matchMember} from "./converters";
 
 const searchTypes = ['contains', 'exact', 'phrase', 'regex'];
 
-const urlPattern = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
+const urlPattern = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
+const imagePattern = /^(https?:\/\/.*\.(?:png|jpg))/i;
 
 class Response {
   keyword_pattern;
@@ -164,10 +166,10 @@ class ResponseLibrary {
   }
 
   async execute (bot, message) {
-    //console.log('Checking match...');
-    let matchResp = null;
+    let matchResp = null, args;
     if (message.content.startsWith(bot.prefix)) {
-      const command = await message.content.slice(bot.prefix.length).split(/ +/, 1);
+      args = message.content.slice(bot.prefix.length).split(/ +/, 10);
+      const command = args.shift();
       for (let resp of this.commands) {
         if (resp.name.toLowerCase() === command) {
           matchResp = resp;
@@ -175,11 +177,6 @@ class ResponseLibrary {
         }
       }
     } else {
-      //console.log('no prefix...');
-      //console.log(`length of responses: ${this.responses.length}`);
-      //console.log(`length of keywords: ${this.keywords.length}`);
-      //console.log(`length of commands: ${this.commands.length}`);
-      //console.log(`keywords: ${this.keywords}`);
       for (let resp of this.keywords) {
         try {
           if (resp.test(message.content)) {
@@ -194,7 +191,6 @@ class ResponseLibrary {
     }
 
     if (!matchResp) return;
-    //console.log('Match found');
 
     const authorMember = await message.guild.fetchMember(message.author);
     const auth = await bot.checkMod(authorMember);
@@ -205,23 +201,55 @@ class ResponseLibrary {
     // If the rate limit blocks and member is not mod, fails
     if (!matchResp.checkRateLimit() && !auth) return;
 
-    let messageSent;
+    const evalled = await ResponseLibrary.evalResponse(matchResp, message, args);
+
+    let messageSent, textContent, embedContent;
     if (matchResp.is_image) {
+      // match url here, not image, because it could be an image anyway
       if (urlPattern.test(matchResp.content)) {
-        const em = new Discord.RichEmbed()
-          .setColor(Color.random().toString())
-          .setImage(matchResp.content);
-        messageSent = await message.channel.send(em);
+        embedContent = matchResp.content;
       } else {
-        messageSent = await message.channel.send(matchResp.content)
+        // test image here because it's less likely a non-image url works
+        if (imagePattern.test(evalled)) embedContent = evalled;
+        else textContent = evalled;
       }
     } else {
-      messageSent = await message.channel.send(matchResp.content)
+      if (imagePattern.test(evalled)) embedContent = evalled;
+      else textContent = evalled;
+    }
+
+    if (textContent) messageSent = await message.channel.send(textContent);
+    else {
+      const em = new Discord.RichEmbed()
+        .setColor(Color.random().toString())
+        .setImage(embedContent);
+      messageSent = await message.channel.send(em);
     }
 
     if (matchResp.delete_after) {
       await messageSent.delete(matchResp.delete_after * 1000);
     }
+  }
+
+  static async evalResponse (resp, message, args) : string {
+    let out = resp.content;
+
+    let replaceMember = message.author;
+    if (out.endsWith('@ru')) {
+      out = out.replace(/@ru/g, '');
+      if (args.length > 0) {
+        replaceMember = await matchMember(message, args[0]);
+        if (!replaceMember) replaceMember = message.author;
+      }
+    }
+    out = out.replace(/@u/g, replaceMember.mention);
+
+    if (out.search(/ @r /)) {
+      const choices = out.split(/ @r /g);
+      out = choices.random();
+    }
+
+    return out;
   }
 
   async listEmbedFields () {
