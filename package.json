@@ -2,7 +2,9 @@
   "name": "olliebot.js",
   "version": "1.0.0",
   "scripts": {
-    "start": "node dist/app.js"
+    "build": "babel src --out-dir dist --source-maps --presets @babel/env --copy-files",
+    "start": "npm run build && node dist/app.js",
+    "start-ws": "node dist/app.js"
   },
   "dependencies": {
     "@babel/plugin-proposal-class-properties": "^7.7.4",
