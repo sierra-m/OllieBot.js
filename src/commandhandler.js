@@ -43,7 +43,11 @@ class CommandHandler {
 
     try {
       const guildData = await bot.fetchGuildData(message.guild);
-      await guildData.responseLib.execute(bot, message);
+      if (!guildData) {
+        console.log(`No guild data for guild ${message.guild.name} ID ${message.guild.id}`);
+      } else {
+        await guildData.responseLib.execute(bot, message);
+      }
     } catch (e) {
       await console.error(e);
     }
