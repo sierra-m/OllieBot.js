@@ -25,6 +25,8 @@
 import CommandGroup from '../util/group'
 import command from '../decorators/command'
 import help from '../decorators/help'
+import modOnly from '../decorators/mod-only'
+import guildOnly from '../decorators/guild-only'
 
 export default class Util extends CommandGroup {
 
@@ -34,6 +36,7 @@ export default class Util extends CommandGroup {
     description: `Clears a number of bot messages. Limit is 20.`,
     examples: ['clear 5']
   })
+  @modOnly
   @command()
   async clear (bot, message, args) {
     const member = message.guild.member(message.author);
@@ -47,9 +50,14 @@ export default class Util extends CommandGroup {
       if (!isNaN(amount)) {
         if (amount > 20) amount = 20;
         const channelMessages = await message.channel.fetchMessages({ limit: 100 });
-        const toDelete = await channelMessages.filter(msg => msg.author.id === bot.user.id);
+        //console.log(`Received ${channelMessages.size}`);
+        //console.log(`client user id is apparently ${bot.client.user.id}`);
+        const toDelete = await channelMessages.filter(msg => msg.author.id === bot.client.user.id);
+        //console.log(toDelete);
+
         try {
-          await message.channel.bulkDelete([...toDelete.values()].slice(0, amount - 1))
+          await message.channel.bulkDelete([...toDelete.values()].slice(0, amount));
+          //await message.channel.send(`Found ${toDelete.size} to delete`);
         } catch (e) {
           console.error(e);
           await message.channel.send(`I'm not allowed to do this`)
@@ -62,5 +70,46 @@ export default class Util extends CommandGroup {
     }
   }
 
+  @help({
+    tagline: `Clears a number of messages`,
+    usage: ['purge <member/"all"> <number>'],
+    description: `Clears a number of member messages. Limit is 20, default is 5. Use "all" keyword for all members`,
+    examples: ['purge {mention} 5', 'purge all 5']
+  })
+  @guildOnly
+  @modOnly
+  @command('{member} {number}', false, true, false, false)
+  async purge (bot, message, args, member, purgeNum) {
+    if (!purgeNum) {
+      purgeNum = 5;
+    } else {
+      purgeNum = purgeNum < 1 ? 1 : purgeNum > 20 ? 20 : purgeNum;
+    }
+
+    if (member) {
+      const channelMessages = await message.channel.fetchMessages({ limit: 100 });
+
+      let toDelete;
+      //console.log(typeof member);
+      if (typeof member == 'string' && member === 'all') {
+        toDelete = await channelMessages.array();
+        //console.log(member);
+      } else {
+        toDelete = await channelMessages.filter(msg => msg.author.id === member.id);
+      }
+
+      try {
+        await message.channel.bulkDelete([...toDelete.values()].slice(1, purgeNum + 1));
+        const sent = await message.channel.send('✅');
+        await sent.delete(5000);
+      } catch (e) {
+        console.error(e);
+        await message.channel.send(`I'm not allowed to do this`)
+      }
+
+    } else {
+      await message.channel.send('Please provide a member.');
+    }
+  }
 
 }

@@ -73,6 +73,10 @@ export default class DiscordBot {
     stmt.run(newStatus, this.client.user.id);
   }
 
+  registerGuild (guild: Discord.Guild) {
+    this.guilds.set(guild.id, new GuildData(guild.id, {}));
+  }
+
   loadCommands (groupNames: Array) {
     this.commandHandler = new CommandHandler(groupNames)
   }

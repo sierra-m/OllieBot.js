@@ -42,9 +42,10 @@ import {sleep} from '../util/tools'
  * @param pattern string
  * @param strict boolean
  * @param removeQuotes boolean
+ * @param enforceTypes booelan
  * @returns {Function}
  */
-const extractArgs = (pattern, strict=false, removeQuotes=true) => {
+const extractArgs = (pattern, strict=false, removeQuotes=true, enforceTypes=true) => {
   // extract {type} statements from pattern
   const subpatterns = pattern.toLowerCase().match(/{([a-z]+)}/g);
   // begin pattern with a search for command - must be standard alphabet chars
@@ -164,7 +165,12 @@ const extractArgs = (pattern, strict=false, removeQuotes=true) => {
       const extractor = extractors[i];
 
       const match = await extractor(message, arg);
-      args.push(match);
+      if (enforceTypes) {
+        args.push(match);
+      } else {
+        if (match) args.push(match);
+        else args.push(arg);
+      }
     }
     await callback();
   }
@@ -176,9 +182,10 @@ const extractArgs = (pattern, strict=false, removeQuotes=true) => {
  * @param strict boolean
  * @param removeQuotes boolean
  * @param subcommand boolean
+ * @param enforceTypes boolean
  * @returns {Function}
  */
-export default function(pattern, strict=false, removeQuotes=true, subcommand=false) {
+export default function(pattern, strict=false, removeQuotes=true, subcommand=false, enforceTypes=true) {
   return function (target, key, descriptor) {
     if (target.commands === undefined) target.commands = [];
     if (target.aliases === undefined) target.aliases = {};
@@ -190,7 +197,7 @@ export default function(pattern, strict=false, removeQuotes=true, subcommand=fal
 
     // If pattern present then wrap it in an extract
     if (pattern) {
-      return wrap(extractArgs(pattern, strict, removeQuotes))(target, key, descriptor);
+      return wrap(extractArgs(pattern, strict, removeQuotes, enforceTypes))(target, key, descriptor);
     }
   }
 }
@@ -200,11 +207,12 @@ export default function(pattern, strict=false, removeQuotes=true, subcommand=fal
  * @param pattern
  * @param strict
  * @param removeQuotes
+ * @param enforceTypes
  * @returns {function(*=, *=, *=): function(...[*]=): Promise<*>}
  */
-function extract (pattern, strict=false, removeQuotes=true) {
+function extract (pattern, strict=false, removeQuotes=true, enforceTypes=true) {
   return function (target, key, descriptor) {
-    return wrap(extractArgs(pattern, strict, removeQuotes))(target, key, descriptor);
+    return wrap(extractArgs(pattern, strict, removeQuotes, enforceTypes))(target, key, descriptor);
   }
 }
 

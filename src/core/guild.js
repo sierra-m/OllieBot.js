@@ -4,6 +4,7 @@ import RateLimit from '../util/rate-limit'
 import {ExistenceError} from '../util/errors'
 import {Statement} from '../typedefs/statement'
 import {ResponseLibrary} from '../util/responses';
+import {getSafe} from '../util/tools';
 
 type GuildOptions = Object;
 
@@ -20,28 +21,28 @@ export default class GuildData {
   blockedCommands;
   rateLimits;
 
-  #created = false;
+  created = false;
 
   constructor (id: String, options: GuildOptions = null) {
     this.id = id;
     this.responseLib = new ResponseLibrary(id);
 
     if (options) {
-      this.joinChannel = options.joinChannel;
-      this.joinMessage = options.joinMessage;
-      this.leaveChannel = options.leaveChannel;
-      this.leaveMessage = options.leaveMessage;
-      this.musicChannel = options.musicChannel;
-      this.defaultRole = options.defaultRole;
-      this.auditChannel = options.auditChannel;
+      this.joinChannel = getSafe(options.joinChannel, null);
+      this.joinMessage = getSafe(options.joinMessage, '');
+      this.leaveChannel = getSafe(options.leaveChannel, null);
+      this.leaveMessage = getSafe(options.leaveMessage, '');
+      this.musicChannel = getSafe(options.musicChannel, null);
+      this.defaultRole = getSafe(options.defaultRole, null);
+      this.auditChannel = getSafe(options.auditChannel, null);
       this.create();
-      this.#created = true;
+      this.created = true;
     } else {
       this.loadData();
       this.loadModRoles();
       this.loadBlockedCommands();
       this.responseLib.load();
-      this.#created = true;
+      this.created = true;
     }
   }
 
@@ -59,7 +60,7 @@ export default class GuildData {
 
   @Conduit.update('insert into guild values (?, ?, ?, ?, ?, ?, ?, ?)')
   create (stmt) {
-    if (this.#created) {
+    if (this.created) {
       throw new Error('Guild already created.')
     }
     stmt.run(
