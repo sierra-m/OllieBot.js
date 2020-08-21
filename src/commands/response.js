@@ -57,7 +57,7 @@ export default class ResponseGroup extends CommandGroup {
   async list(bot, message, args) {
     const guildData = await bot.fetchGuildData(message.guild);
     const respItems = await guildData.responseLib.listEmbedFields();
-    const respPages = new Pages(respItems, 6);
+    const respPages = new Pages(respItems, 10);
     const paginator = new Paginator(respPages, 'Responses', listIcon, '#d254e3');
 
     let pageNum = 1;
