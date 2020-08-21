@@ -23,6 +23,7 @@
 */
 
 import DiscordBot from './core/bot'
+import GuildData from "./core/guild";
 
 class CommandHandler {
   constructor (groups: Array<Class>) {
@@ -44,7 +45,9 @@ class CommandHandler {
     try {
       const guildData = await bot.fetchGuildData(message.guild);
       if (!guildData) {
-        console.log(`No guild data for guild ${message.guild.name} ID ${message.guild.id}`);
+        console.log(`No guild data for guild ${message.guild.name} ID ${message.guild.id}, adding it.`);
+        const newGuildData = new GuildData(message.guild.id, {joinChannel: message.guild.systemChannelID});
+        await bot.addGuildData(newGuildData);
       } else {
         await guildData.responseLib.execute(bot, message);
       }

@@ -98,6 +98,10 @@ export default class DiscordBot {
   async fetchGuildData (guild: Discord.Guild) : GuildData {
     return await this.guilds.get(guild.id)
   }
+
+  async addGuildData (guildID: Discord.Snowflake, guildData: GuildData) {
+    await this.guilds.set(guildID, guildData);
+  }
   
   async checkMod (member: Discord.GuildMember) {
     const guildData = await this.fetchGuildData(member.guild);
