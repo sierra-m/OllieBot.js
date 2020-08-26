@@ -67,7 +67,7 @@ export default class Admin extends CommandGroup {
   @command()
   async sleep (bot, message, args) {
     await message.channel.send('Nightie night... 🌃');
-    process.exit(1312);
+    process.exit(10);
   }
 
   @ownerOnly

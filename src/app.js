@@ -86,7 +86,7 @@ if (cluster.isMaster) {
   cluster.fork();
 
   cluster.on('exit', function(worker, code, signal) {
-    if (code !== 1312) {
+    if (code !== 10) {
       console.log(`A worker was murdered!! The responsibility seems to fall on ${code} ${signal} >:(`);
       bot.client.destroy();
       cluster.fork();
