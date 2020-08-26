@@ -24,7 +24,7 @@
 import Discord from 'discord.js'
 
 import CommandGroup from '../util/group'
-import command from '../decorators/command'
+import command, {extract} from '../decorators/command'
 import help from '../decorators/help'
 import aliases from '../decorators/aliases'
 import guildOnly from '../decorators/guild-only'
@@ -54,7 +54,7 @@ export default class ResponseGroup extends CommandGroup {
   @guildOnly
   @modOnly
   @subcommand('response')
-  async list(bot, message, args) {
+  async list (bot, message, args) {
     const guildData = await bot.fetchGuildData(message.guild);
     const respItems = await guildData.responseLib.listEmbedFields();
     const respPages = new Pages(respItems, 10);
@@ -94,6 +94,22 @@ export default class ResponseGroup extends CommandGroup {
       }
     } catch (e) {
       await message.channel.send('Something went wrong ❌');
+    }
+  }
+
+  @guildOnly
+  @modOnly
+  @subcommand('response')
+  @extract('{string}', false, false)
+  async remove (bot, message, args, name) {
+    name = name.replace(/"/g, '');
+
+    const guildData = await bot.fetchGuildData(message.guild);
+    const success = guildData.responseLib.remove(name);
+    if (success) {
+      await message.channel.send(`Removed response **${name}**.`)
+    } else {
+      await message.channel.send(`No response named **${name}** exists.`)
     }
   }
 }

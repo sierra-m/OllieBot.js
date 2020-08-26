@@ -155,6 +155,27 @@ class ResponseLibrary {
     this.sortResponses();
   }
 
+  get (name) {
+    for (let resp of this.responses) {
+      if (resp.name === name) return resp;
+    }
+    return null;
+  }
+
+  @Conduit.update('delete from responses where guild_id=? and name=?')
+  remove (name, stmt) {
+    const found = this.get(name);
+    if (found) {
+      stmt.run(this.guildId, found.name);
+      this.responses = this.responses.remove(found);
+      this.commands = this.commands.remove(found);
+      this.keywords = this.keywords.remove(found);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   // sort for search optimization - commands search faster because single word
   sortResponses () {
     this.commands = [];
@@ -256,7 +277,7 @@ class ResponseLibrary {
     return await this.responses.map(resp => (
       {
         name: resp.name,
-        value: `Type: ${resp.requires_prefix ? 'Command' : 'Keyword'} Image: ${(!!resp.is_image).toString().capitalize()}`,
+        value: `${resp.requires_prefix ? 'Command' : 'Keyword'}${resp.is_image ? ', Image' : ''}`,
         inline: false
       }
     ))
