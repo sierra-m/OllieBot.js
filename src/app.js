@@ -21,7 +21,7 @@
 * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 * DEALINGS IN THE SOFTWARE.
 */
-
+import cluster from 'cluster'
 import Discord from 'discord.js'
 import {prefix, token} from './config'
 import DiscordBot from './core/bot'
@@ -56,7 +56,7 @@ Array.prototype.remove = function (item) {
 
 String.prototype.capitalize = function() {
   return this.charAt(0).toUpperCase() + this.slice(1);
-}
+};
 
 const bot = new DiscordBot('Test Mode OllieBot', '305407800778162178');
 bot.loadCommands(['fun', 'util', 'admin', 'reactions', 'response']);
@@ -70,8 +70,32 @@ bot.client.on('message', async msg => {
   await bot.commandHandler.handle(bot, msg);
 });
 
-try {
+process.on('unhandledRejection', error => {
+  console.error('Unhandled promise rejection:', error);
+});
+
+/*try {
   bot.login(token);
 } catch (e) {
-  bot.destroy();
+  if (e.message !== 'Unexpected server response: 520')  {
+    bot.destroy();
+  }
+}*/
+
+if (cluster.isMaster) {
+  cluster.fork();
+
+  cluster.on('exit', function(worker, code, signal) {
+    if (code !== 1312) {
+      console.log(`A worker was murdered!! The responsibility seems to fall on ${code} ${signal} >:(`);
+      bot.client.destroy();
+      cluster.fork();
+    } else {
+      bot.client.destroy();
+    }
+  });
+}
+
+if (cluster.isWorker) {
+  bot.login(token);
 }

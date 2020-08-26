@@ -62,4 +62,18 @@ export default class Admin extends CommandGroup {
   async testmodonly (bot, message, args) {
     await message.channel.send('It worked! You have permission :blush:');
   }
+
+  @ownerOnly
+  @command()
+  async sleep (bot, message, args) {
+    await message.channel.send('Nightie night... 🌃');
+    process.exit(1312);
+  }
+
+  @ownerOnly
+  @command()
+  async nap (bot, message, args) {
+    await message.channel.send('Taking a short nap... 💤 🐰');
+    process.exit(1);
+  }
 }
