@@ -41,6 +41,11 @@ import DiscordBot from '../core/bot';
 async function modOnly (callback, args, name, type) {
   const bot: DiscordBot = args[0];
   const message = args[1];
+  if (!message.guild) {
+    const m = await message.channel.send(`I'm afraid this command must be run in a guild.`);
+    await m.delete(4000);
+    return;
+  }
   const authorMember = await message.guild.fetchMember(message.author);
 
   const auth = await bot.checkMod(authorMember);
