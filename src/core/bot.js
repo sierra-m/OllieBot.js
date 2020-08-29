@@ -28,6 +28,8 @@ import Conduit from '../util/conduit'
 import GuildData from './guild'
 import help from '../commands/help'
 import Reactions from '../util/reactions'
+import moment from "moment";
+import { sleep } from "../util/tools";
 
 export default class DiscordBot {
   prefix;
@@ -99,6 +101,10 @@ export default class DiscordBot {
     return await this.guilds.get(guild.id)
   }
 
+  async fetchGuildDataById (guildId: Discord.Snowflake) : GuildData {
+    return await this.guilds.get(guildId)
+  }
+
   async addGuildData (guildID: Discord.Snowflake, guildData: GuildData) {
     await this.guilds.set(guildID, guildData);
   }
@@ -113,5 +119,30 @@ export default class DiscordBot {
       if (guildData.hasModeRole(role)) return true;
     }
     return false;
+  }
+
+  async birthdayHandler (delay=60) {
+    const choices = ['Happy Birthday to {mention}! 🎉', '{mention}, Happy Birthday!! 🎉', '🎉🎉 Happy Birthday, {mention}! 🎉🎉'];
+
+    let prev, now;
+    while (true) {
+      prev = moment().utc();
+      await sleep(delay * 1000);
+      now = moment().utc();
+      if (prev.hour() !== now.hour()) {
+        // 00:00 in PST, 08:00 in UTC
+        if (now.hour() === 8) {
+          for (let guildData of this.guilds) {
+            const guild = this.client.guilds.get(guildData.id);
+            const channel = guild.channels.get(guildData.joinChannel);
+            const birthdayUsers = await guildData.matchBirthdays(now);
+            for (let userId of birthdayUsers) {
+              const member = guild.members.get(userId);
+              await channel.send(choices.random().replace('{mention}', member.mention))
+            }
+          }
+        }
+      }
+    }
   }
 }

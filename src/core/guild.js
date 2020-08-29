@@ -1,31 +1,34 @@
 import Conduit from '../util/conduit'
 import Discord from 'discord.js'
+import Birthdays from '../util/birthdays'
 import RateLimit from '../util/rate-limit'
 import {ExistenceError} from '../util/errors'
 import {Statement} from '../typedefs/statement'
 import {ResponseLibrary} from '../util/responses';
-import {getSafe} from '../util/tools';
+import { getSafe, sleep } from '../util/tools';
+import moment from "moment";
 
 type GuildOptions = Object;
 
 export default class GuildData {
   id;
-  joinChannel;
-  joinMessage;
-  leaveChannel;
-  leaveMessage;
-  musicChannel;
-  defaultRole;
-  auditChannel;
-  modRoles;
-  blockedCommands;
-  rateLimits;
-
   created = false;
 
   constructor (id: String, options: GuildOptions = null) {
     this.id = id;
     this.responseLib = new ResponseLibrary(id);
+    this.birthdays = new Birthdays(id);
+
+    this.joinChannel = '';
+    this.joinMessage = '';
+    this.leaveChannel = '';
+    this.leaveMessage = '';
+    this.musicChannel = '';
+    this.defaultRole = '';
+    this.auditChannel = '';
+    this.modRoles = [];
+    this.blockedCommands = [];
+    this.rateLimits = [];
 
     if (options) {
       this.joinChannel = getSafe(options.joinChannel, null);
@@ -42,6 +45,7 @@ export default class GuildData {
       this.loadModRoles();
       this.loadBlockedCommands();
       this.responseLib.load();
+      this.birthdays.load();
       this.created = true;
     }
   }
@@ -198,5 +202,9 @@ export default class GuildData {
 
   isBlocked (command: String) {
     return this.blockedCommands.includes(command);
+  }
+
+  async matchBirthdays (timestamp: moment.Moment) {
+    return await this.birthdays.getMatches(timestamp);
   }
 }

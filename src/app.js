@@ -98,4 +98,5 @@ if (cluster.isMaster) {
 
 if (cluster.isWorker) {
   bot.login(token);
+  bot.birthdayHandler();
 }
