@@ -43,13 +43,15 @@ class CommandHandler {
     if (message.author.bot) return;
 
     try {
-      const guildData = await bot.fetchGuildData(message.guild);
-      if (!guildData) {
-        console.log(`No guild data for guild ${message.guild.name} ID ${message.guild.id}, adding it.`);
-        const newGuildData = new GuildData(message.guild.id, {joinChannel: message.guild.systemChannelID});
-        await bot.addGuildData(newGuildData);
-      } else {
-        await guildData.responseLib.execute(bot, message);
+      if (message.guild) {
+        const guildData = await bot.fetchGuildData(message.guild);
+        if (!guildData) {
+          console.log(`No guild data for guild ${message.guild.name} ID ${message.guild.id}, adding it.`);
+          const newGuildData = new GuildData(message.guild.id, {joinChannel: message.guild.systemChannelID});
+          await bot.addGuildData(newGuildData);
+        } else {
+          await guildData.responseLib.execute(bot, message);
+        }
       }
     } catch (e) {
       await console.error(e);
