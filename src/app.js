@@ -97,6 +97,5 @@ if (cluster.isMaster) {
 }
 
 if (cluster.isWorker) {
-  bot.login(token);
-  bot.birthdayHandler();
+  Promise.all([bot.login(token), bot.birthdayHandler()]).catch(console.log);
 }
