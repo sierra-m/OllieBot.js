@@ -24,6 +24,7 @@
 
 import DiscordBot from './core/bot'
 import GuildData from "./core/guild";
+import handleMisc from './util/handle-misc'
 
 class CommandHandler {
   constructor (groups: Array<Class>) {
@@ -41,6 +42,8 @@ class CommandHandler {
   async handle (bot: DiscordBot, message) {
     //console.log(`Groups: ${this.commandGroups.map(x => x.constructor.name)}`);
     if (message.author.bot) return;
+
+    await handleMisc(bot, message);
 
     try {
       if (message.guild) {

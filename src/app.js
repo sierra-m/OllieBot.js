@@ -58,6 +58,10 @@ String.prototype.capitalize = function() {
   return this.charAt(0).toUpperCase() + this.slice(1);
 };
 
+Discord.Message.prototype.hasMedia = function () {
+  return this.attachments.size > 0 || this.embeds.size > 0;
+};
+
 const bot = new DiscordBot('Test Mode OllieBot', '305407800778162178');
 bot.loadCommands(['fun', 'util', 'admin', 'reactions', 'response']);
 bot.loadHelp();
