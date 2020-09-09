@@ -262,8 +262,10 @@ export default class Fun extends CommandGroup {
     }
     await em.addField('Status', member.presence.status.replace(/dnd$/, 'do not disturb').replace(/^\w/, c => c.toUpperCase()), false);
     if (member.presence.status !== 'offline') {
-      if (member.presence.game.name === 'Custom Status') await em.addField('Presence', member.presence.game.state, false);
-      else await em.addField(statusTypes[member.presence.game.type], member.presence.game.name)
+      if (member.presence.game) {
+        if (member.presence.game.name === 'Custom Status') await em.addField('Presence', member.presence.game.state, false);
+        else await em.addField(statusTypes[member.presence.game.type], member.presence.game.name)
+      }
     }
     em.addField('Nickname', member.nickname || '*None*', false);
     em.addField('Created', createdAt, false);
