@@ -74,6 +74,19 @@ bot.client.on('message', async msg => {
   await bot.commandHandler.handle(bot, msg);
 });
 
+bot.client.on('guildMemberAdd', async member => {
+  const guildData = await bot.fetchGuildData(member.guild);
+  const joinChannel = guildData.joinChannel;
+  if (joinChannel) {
+    try {
+      const channel = bot.client.channels.get(joinChannel);
+      await channel.send(guildData.joinMessage);
+    } catch (e) {
+      console.log(`guildMemberAdd exception:\n${e}`)
+    }
+  }
+});
+
 process.on('unhandledRejection', error => {
   console.error('Unhandled promise rejection:', error);
 });
