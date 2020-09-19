@@ -80,7 +80,8 @@ bot.client.on('guildMemberAdd', async member => {
   if (joinChannel) {
     try {
       const channel = bot.client.channels.get(joinChannel);
-      await channel.send(guildData.joinMessage);
+      const message = guildData.joinMessage.replace(/@u/gi, member.mention);
+      await channel.send(message);
     } catch (e) {
       console.log(`guildMemberAdd exception:\n${e}`)
     }
