@@ -28,22 +28,47 @@ export default class BirthdayGroup extends CommandGroup {
   @subcommand('birthday')
   @extract('{member} {group}')
   async add (bot, message, args, member, date) {
-    if (date) {
-      console.log(date);
-      const timestamp = await moment(date);
-      console.log(timestamp);
-      if (timestamp) {
-        await message.channel.send(`You gave me ${timestamp.format('MMMM Do YYYY, h:mm:ss a')}`);
+    if (member) {
+      const guildData = await bot.fetchGuildData(message.guild);
+      if (date) {
+        const timestamp = await moment.utc(date);
+        if (timestamp.isValid()) {
+          const success = guildData.birthdays.add(member, timestamp);
+          if (success) {
+            await message.channel.send(`Birthday for ${member.mention} set to ${timestamp.format('MMMM Do')}`);
+          } else {
+            await message.channel.send(`A birthday already exists for **${member.displayName}**`);
+          }
+        } else {
+          await message.channel.send(`Please provide a valid date.`);
+        }
       } else {
-        await message.channel.send(`I didn't receive a date...`);
+        await message.channel.send(`Please provide a date.`);
       }
+    } else {
+      await message.channel.send(`Please provide a member and date.`);
     }
   }
 
   @subcommand('birthday')
   @extract('{member}')
   async get (bot, message, args, member) {
-    await message.channel.send('Not implemented yet.');
+    if (member) {
+      const guildData = await bot.fetchGuildData(message.guild);
+      const found = guildData.birthdays.get(member.id);
+      if (found) {
+        const timestamp = found.asTimestamp();
+        const em = new Discord.RichEmbed()
+          .setColor('#00ff00')
+          .setDescription(`${member.displayName}'s birthday is **${timestamp.format('MMMM Do')}**`)
+          .setAuthor(member.user.username, member.user.avatarURL);
+        await message.channel.send(em);
+      } else {
+        await message.channel.send(`No birthday recorded for **${member.displayName}**.`);
+      }
+    } else {
+      await message.channel.send(`Please provide a member.`);
+    }
   }
 
   @subcommand('birthday')

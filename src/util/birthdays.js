@@ -14,6 +14,10 @@ class Birthday {
   compareDate (timestamp: moment.Moment) {
     return timestamp.date() === this.date && timestamp.month() === this.month;
   }
+
+  asTimestamp () {
+    return moment.utc({date: this.date, month: this.month})
+  }
 }
 
 export default class Birthdays {
@@ -47,7 +51,22 @@ export default class Birthdays {
     const found = this.get(userId);
     if (!found) {
       stmt.run(guildId, userId, datetime);
-      this.birthdays.push(new Birthday(guildId, userId, timestamp))
+      this.birthdays.push(new Birthday(guildId, userId, timestamp));
+      return true;
+    } else return false;
+  }
+
+  @Conduit.update('update birthdays set datetime=? where guild_id=? and user_id=?')
+  set (member: Discord.GuildMember, timestamp: moment.Moment, stmt) {
+    timestamp = timestamp.utc();  // make sure it's utc first
+    const guildId = member.guild.id;
+    const userId = member.id;
+    const datetime = timestamp.unix();
+    const found = this.get(userId);
+    if (found) {
+      stmt.run(datetime, guildId, userId);
+      found.date = timestamp.date();
+      found.month = timestamp.month();
       return true;
     } else return false;
   }
