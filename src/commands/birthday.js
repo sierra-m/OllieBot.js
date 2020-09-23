@@ -1,4 +1,5 @@
 import Discord from 'discord.js'
+import moment from 'moment'
 
 import Color from '../util/color'
 import CommandGroup from '../util/group'
@@ -8,7 +9,6 @@ import aliases from '../decorators/aliases'
 import guildOnly from '../decorators/guild-only'
 import subcommand from '../decorators/subcommand'
 import {extract} from '../decorators/command'
-import dateify from '../util/dateify'
 
 export default class BirthdayGroup extends CommandGroup {
 
@@ -30,7 +30,7 @@ export default class BirthdayGroup extends CommandGroup {
   async add (bot, message, args, member, date) {
     if (date) {
       console.log(date);
-      const timestamp = await dateify(date);
+      const timestamp = await moment(date);
       console.log(timestamp);
       if (timestamp) {
         await message.channel.send(`You gave me ${timestamp.format('MMMM Do YYYY, h:mm:ss a')}`);
