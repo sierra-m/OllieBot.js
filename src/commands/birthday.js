@@ -8,8 +8,9 @@ import aliases from '../decorators/aliases'
 import guildOnly from '../decorators/guild-only'
 import subcommand from '../decorators/subcommand'
 import {extract} from '../decorators/command'
+import dateify from '../util/dateify'
 
-class BirthdayGroup extends CommandGroup {
+export default class BirthdayGroup extends CommandGroup {
 
   @help({
     tagline: `Manage birthdays`,
@@ -27,7 +28,16 @@ class BirthdayGroup extends CommandGroup {
   @subcommand('birthday')
   @extract('{member} {group}')
   async add (bot, message, args, member, date) {
-    await message.channel.send('Not implemented yet.');
+    if (date) {
+      console.log(date);
+      const timestamp = await dateify(date);
+      console.log(timestamp);
+      if (timestamp) {
+        await message.channel.send(`You gave me ${timestamp.format('MMMM Do YYYY, h:mm:ss a')}`);
+      } else {
+        await message.channel.send(`I didn't receive a date...`);
+      }
+    }
   }
 
   @subcommand('birthday')
