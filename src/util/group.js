@@ -60,8 +60,9 @@ export default class CommandGroup {
   }
 
   hasSubcommand (command, subcommand) {
-    if (command in this.__proto__.subcommands) {
-      if (this.__proto__.subcommands[command].includes(subcommand)) return true;
+    const foundOriginal = this.resolveCommand(command);
+    if (foundOriginal in this.__proto__.subcommands) {
+      if (this.__proto__.subcommands[foundOriginal].includes(subcommand)) return true;
     }
     return false;
   }
