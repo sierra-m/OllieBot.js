@@ -27,6 +27,7 @@ import command from '../decorators/command'
 import help from '../decorators/help'
 import modOnly from '../decorators/mod-only'
 import guildOnly from '../decorators/guild-only'
+import aliases from '../decorators/aliases'
 
 export default class Util extends CommandGroup {
 
@@ -109,6 +110,30 @@ export default class Util extends CommandGroup {
 
     } else {
       await message.channel.send('Please provide a member.');
+    }
+  }
+
+  @help({
+    tagline: `Get/set the server's join message`,
+    usage: ['joinmessage (optional:<set> [new-content])'],
+    description: `Get/set the server join message. Use the identifier "@u" to use the joined member's mention`,
+    examples: ['joinmessage', 'joinmessage set "Hello there @u!"']
+  })
+  @guildOnly
+  @modOnly
+  @aliases(['joinmsg', 'join-message'])
+  @command('{string} {group}')
+  async joinmessage (bot, message, args, command, content) {
+    const guildData = await bot.fetchGuildData(message.guild);
+    if (command && command === 'set') {
+      if (content) {
+        guildData.setJoinMessage(content);
+        await message.channel.send(`Join message set to: \n\`\`\`${content}\`\`\` `);
+      } else {
+        await message.channel.send('Please provide new message content.');
+      }
+    } else {
+      await message.channel.send(`Join message set to: \n\`\`\`${guildData.joinMessage}\`\`\` `);
     }
   }
 
