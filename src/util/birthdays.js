@@ -33,6 +33,15 @@ export default class Birthdays {
     return null;
   }
 
+  fromDate (timestamp: moment.Moment) {
+    const out = [];
+    for (let b of this.birthdays) {
+      if (b.compareDate(timestamp.utc())) out.push(b);
+    }
+    if (out.length > 0) return out;
+    return null;
+  }
+
   @Conduit.access('select * from birthdays where guild_id=?')
   load (stmt) {
     const rows = stmt.all(this.guildId);

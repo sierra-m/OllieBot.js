@@ -10,11 +10,13 @@ import guildOnly from '../decorators/guild-only'
 import subcommand from '../decorators/subcommand'
 import {extract} from '../decorators/command'
 
+const birthdayIcon = 'https://abs-0.twimg.com/emoji/v2/72x72/1f382.png';
+
 export default class BirthdayGroup extends CommandGroup {
 
   @help({
     tagline: `Manage birthdays`,
-    usage: ['birthday add [@member] [date]', 'birthday <remove/get> [@member]'],
+    usage: ['birthday add [@member] [date]', 'birthday <remove/get> [@member]', 'birthday <list> [date]'],
     description: `Manage and get birthdays. **add** and **remove** are mod-only`,
     examples: ['birthday', 'birthday add {mention} December 6']
   })
@@ -68,6 +70,36 @@ export default class BirthdayGroup extends CommandGroup {
       }
     } else {
       await message.channel.send(`Please provide a member.`);
+    }
+  }
+
+  @subcommand('birthday')
+  @extract('{group}')
+  async list (bot, message, args, date) {
+    if (date) {
+      const guildData = await bot.fetchGuildData(message.guild);
+      const timestamp = await moment.utc(date);
+      const found = guildData.birthdays.fromDate(timestamp);
+      if (found) {
+        const names = [];
+        for (let b of found) {
+          const member = message.guild.members.get(b.userId);
+          if (member) names.push(member.mention)
+        }
+        if (names.length > 0) {
+          const em = new Discord.RichEmbed()
+            .setColor('#f70c76')
+            .setDescription(names.join(', '))
+            .setAuthor(`Birthdays for ${timestamp.format('MMMM Do')}`, birthdayIcon);
+          await message.channel.send(em);
+        } else {
+          await message.channel.send(`No birthdays recorded for **${timestamp.format("MMMM Do")}**.`);
+        }
+      } else {
+        await message.channel.send(`No birthdays recorded for **${timestamp.format("MMMM Do")}**.`);
+      }
+    } else {
+      await message.channel.send(`Please provide a valid date.`);
     }
   }
 
