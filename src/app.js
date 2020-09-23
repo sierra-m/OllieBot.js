@@ -63,7 +63,7 @@ Discord.Message.prototype.hasMedia = function () {
 };
 
 const bot = new DiscordBot('Test Mode OllieBot', '305407800778162178');
-bot.loadCommands(['fun', 'util', 'admin', 'reactions', 'response']);
+bot.loadCommands(['fun', 'util', 'admin', 'reactions', 'response', 'birthday']);
 bot.loadHelp();
 
 bot.client.on('ready', () => {

@@ -130,16 +130,26 @@ export default class DiscordBot {
       await sleep(delay * 1000);
       now = moment().utc();
       if (prev.hour() !== now.hour()) {
+        console.log(`---> Hour Crossover Event at ${now.hour()} UTC<---`);
         // 00:00 in PST, 08:00 in UTC
         if (now.hour() === 8) {
-          for (let guildData of this.guilds) {
-            const guild = this.client.guilds.get(guildData.id);
-            const channel = guild.channels.get(guildData.joinChannel);
-            const birthdayUsers = await guildData.matchBirthdays(now);
-            for (let userId of birthdayUsers) {
-              const member = guild.members.get(userId);
-              await channel.send(choices.random().replace('{mention}', member.mention))
+          console.log('---> Birthday Checking Event <---');
+          try {
+            for (let guildData of this.guilds.array()) {
+              const guild = this.client.guilds.get(guildData.id);
+              const channel = this.client.channels.get(guildData.joinChannel);
+              if (guild && channel) {
+                const birthdayUsers = await guildData.matchBirthdays(now);
+                for (let userId of birthdayUsers) {
+                  const member = guild.members.get(userId);
+                  await channel.send(choices.random().replace('{mention}', member.mention));
+                }
+              } else {
+                console.log(`Birthdays failed for guild ${guildData.id}`)
+              }
             }
+          } catch (e) {
+            console.log(`Birthday checking error:\n${e}`);
           }
         }
       }
