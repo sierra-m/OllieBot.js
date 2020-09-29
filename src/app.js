@@ -23,9 +23,14 @@
 */
 import cluster from 'cluster'
 import Discord from 'discord.js'
-import {prefix, token} from './config'
+import moment from 'moment'
+import {botName, ownerID, prefix, token} from './config'
 import DiscordBot from './core/bot'
+import logging from './util/logging'
 import "regenerator-runtime/runtime"
+
+
+moment.suppressDeprecationWarnings = true;
 
 // why isn't this a core feature smh
 /*Discord.GuildMember.prototype.mention = function () {
@@ -62,12 +67,12 @@ Discord.Message.prototype.hasMedia = function () {
   return this.attachments.size > 0 || this.embeds.size > 0;
 };
 
-const bot = new DiscordBot('Test Mode OllieBot', '305407800778162178');
+const bot = new DiscordBot(botName, ownerID);
 bot.loadCommands(['fun', 'util', 'admin', 'reactions', 'response', 'birthday']);
 bot.loadHelp();
 
 bot.client.on('ready', () => {
-  console.log(`Logged in as ${bot.client.user.tag}!`);
+  logging.info(`Logged in as ${bot.client.user.tag}!`);
 });
 
 bot.client.on('message', async msg => {
@@ -83,13 +88,13 @@ bot.client.on('guildMemberAdd', async member => {
       const message = guildData.joinMessage.replace(/@u/gi, member.mention);
       await channel.send(message);
     } catch (e) {
-      console.log(`guildMemberAdd exception:\n${e}`)
+      logging.error(`guildMemberAdd exception:`, e)
     }
   }
 });
 
 process.on('unhandledRejection', error => {
-  console.error('Unhandled promise rejection:', error);
+  logging.error('Unhandled promise rejection:', error);
 });
 
 /*try {
@@ -105,7 +110,7 @@ if (cluster.isMaster) {
 
   cluster.on('exit', function(worker, code, signal) {
     if (code !== 10) {
-      console.log(`A worker was murdered!! The responsibility seems to fall on ${code} ${signal} >:(`);
+      logging.info(`A worker was murdered!! The responsibility seems to fall on ${code} ${signal} >:(`);
       bot.client.destroy();
       cluster.fork();
     } else {
@@ -115,5 +120,5 @@ if (cluster.isMaster) {
 }
 
 if (cluster.isWorker) {
-  Promise.all([bot.login(token), bot.birthdayHandler()]).catch(console.log);
+  Promise.all([bot.login(token), bot.birthdayHandler()]).catch(logging.info);
 }

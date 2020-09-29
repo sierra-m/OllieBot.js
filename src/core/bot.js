@@ -28,8 +28,9 @@ import Conduit from '../util/conduit'
 import GuildData from './guild'
 import help from '../commands/help'
 import Reactions from '../util/reactions'
-import moment from "moment";
-import { sleep } from "../util/tools";
+import moment from 'moment'
+import logging from '../util/logging'
+import { sleep } from '../util/tools'
 
 export default class DiscordBot {
   prefix;
@@ -46,6 +47,7 @@ export default class DiscordBot {
     this.reactions.load();
     this.loadBotData();
     this.loadGuildData();
+    logging.info('Loaded bot from storage.')
   }
 
   @Conduit.access('select * from bot limit 1')
@@ -130,10 +132,10 @@ export default class DiscordBot {
       await sleep(delay * 1000);
       now = moment().utc();
       if (prev.hour() !== now.hour()) {
-        console.log(`---> Hour Crossover Event at ${now.hour()} UTC<---`);
+        logging.info(`---> Hour Crossover Event at ${now.hour()} UTC<---`);
         // 00:00 in PST, 08:00 in UTC
         if (now.hour() === 8) {
-          console.log('---> Birthday Checking Event <---');
+          logging.info('---> Birthday Checking Event <---');
           try {
             for (let guildData of this.guilds.array()) {
               const guild = this.client.guilds.get(guildData.id);
@@ -145,11 +147,11 @@ export default class DiscordBot {
                   await channel.send(choices.random().replace('{mention}', member.mention));
                 }
               } else {
-                console.log(`Birthdays failed for guild ${guildData.id}`)
+                logging.error(`Birthdays failed for guild ${guildData.id}`)
               }
             }
           } catch (e) {
-            console.log(`Birthday checking error:\n${e}`);
+            logging.error(`Birthday checking error:`, e);
           }
         }
       }

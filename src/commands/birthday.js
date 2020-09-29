@@ -74,6 +74,31 @@ export default class BirthdayGroup extends CommandGroup {
   }
 
   @subcommand('birthday')
+  @extract('{member} {group}')
+  async set (bot, message, args, member, date) {
+    if (member) {
+      const guildData = await bot.fetchGuildData(message.guild);
+      if (date) {
+        const timestamp = await moment.utc(date);
+        if (timestamp.isValid()) {
+          const success = guildData.birthdays.set(member, timestamp);
+          if (success) {
+            await message.channel.send(`Birthday for ${member.mention} set to ${timestamp.format('MMMM Do')}`);
+          } else {
+            await message.channel.send(`Couldn't update birthday for **${member.displayName}** :(`);
+          }
+        } else {
+          await message.channel.send(`Please provide a valid date.`);
+        }
+      } else {
+        await message.channel.send(`Please provide a date.`);
+      }
+    } else {
+      await message.channel.send(`Please provide a member and date.`);
+    }
+  }
+
+  @subcommand('birthday')
   @extract('{group}')
   async list (bot, message, args, date) {
     if (date) {
