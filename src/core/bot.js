@@ -144,7 +144,9 @@ export default class DiscordBot {
                 const birthdayUsers = await guildData.matchBirthdays(now);
                 for (let userId of birthdayUsers) {
                   const member = guild.members.get(userId);
-                  await channel.send(choices.random().replace('{mention}', member.mention));
+                  if (member) {
+                    await channel.send(choices.random().replace('{mention}', member.mention));
+                  }
                 }
               } else {
                 logging.error(`Birthdays failed for guild ${guildData.id}`)
