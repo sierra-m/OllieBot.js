@@ -181,7 +181,10 @@ export default class Util extends CommandGroup {
         await message.channel.send('Please provide new channel.');
       }
     } else {
-      await message.channel.send(`Leave channel set to: <#${guildData.leaveChannel}>`);
+      if (guildData.leaveChannel)
+        await message.channel.send(`Leave channel set to: <#${guildData.leaveChannel}>`);
+      else
+        await message.channel.send(`Leave channel not set.`);
     }
   }
 
@@ -205,7 +208,10 @@ export default class Util extends CommandGroup {
         await message.channel.send('Please provide new channel.');
       }
     } else {
-      await message.channel.send(`Leave channel set to: <#${guildData.joinChannel}>`);
+      if (guildData.joinChannel)
+        await message.channel.send(`Join channel set to: <#${guildData.joinChannel}>`);
+      else
+        await message.channel.send(`Join channel not set.`);
     }
   }
 }
