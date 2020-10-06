@@ -7,6 +7,7 @@ import command from '../decorators/command'
 import help from '../decorators/help'
 import aliases from '../decorators/aliases'
 import guildOnly from '../decorators/guild-only'
+import modOnly from '../decorators/mod-only'
 import subcommand from '../decorators/subcommand'
 import {extract} from '../decorators/command'
 
@@ -16,42 +17,19 @@ export default class BirthdayGroup extends CommandGroup {
 
   @help({
     tagline: `Manage birthdays`,
-    usage: ['birthday add [@member] [date]', 'birthday <remove/get> [@member]', 'birthday <list> [date]'],
+    usage: ['birthday set [@member] [date]', 'birthday <remove/get> [@member]', 'birthday <list> [date]'],
     description: `Manage and get birthdays. **add** and **remove** are mod-only`,
     examples: ['birthday', 'birthday add {mention} December 6']
   })
   @aliases(['birthdays', 'bdays', 'b-days'])
   @guildOnly
+  @modOnly
   @command()
   async birthday (bot, message, args) {
     await message.channel.send('Please supply an argument.');
   }
 
-  @subcommand('birthday')
-  @extract('{member} {group}')
-  async add (bot, message, args, member, date) {
-    if (member) {
-      const guildData = await bot.fetchGuildData(message.guild);
-      if (date) {
-        const timestamp = await moment.utc(date);
-        if (timestamp.isValid()) {
-          const success = guildData.birthdays.add(member, timestamp);
-          if (success) {
-            await message.channel.send(`Birthday for ${member.mention} set to ${timestamp.format('MMMM Do')}`);
-          } else {
-            await message.channel.send(`A birthday already exists for **${member.displayName}**`);
-          }
-        } else {
-          await message.channel.send(`Please provide a valid date.`);
-        }
-      } else {
-        await message.channel.send(`Please provide a date.`);
-      }
-    } else {
-      await message.channel.send(`Please provide a member and date.`);
-    }
-  }
-
+  @guildOnly
   @subcommand('birthday')
   @extract('{member}')
   async get (bot, message, args, member) {
@@ -73,6 +51,8 @@ export default class BirthdayGroup extends CommandGroup {
     }
   }
 
+  @guildOnly
+  @modOnly
   @subcommand('birthday')
   @extract('{member} {group}')
   async set (bot, message, args, member, date) {
@@ -81,11 +61,15 @@ export default class BirthdayGroup extends CommandGroup {
       if (date) {
         const timestamp = await moment.utc(date);
         if (timestamp.isValid()) {
-          const success = guildData.birthdays.set(member, timestamp);
+          let success = guildData.birthdays.add(member, timestamp);
           if (success) {
             await message.channel.send(`Birthday for ${member.mention} set to ${timestamp.format('MMMM Do')}`);
           } else {
-            await message.channel.send(`Couldn't update birthday for **${member.displayName}** :(`);
+            success = guildData.birthdays.set(member, timestamp);
+            if (success) {
+              await message.channel.send(`Birthday for ${member.mention} changed to ${timestamp.format('MMMM Do')}`);
+            } else
+              await message.channel.send(`Couldn't update birthday for **${member.displayName}** :(`);
           }
         } else {
           await message.channel.send(`Please provide a valid date.`);
