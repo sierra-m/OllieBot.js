@@ -527,7 +527,10 @@ export default class Fun extends CommandGroup {
     const usedEmotes = [];
     const failures = [];
 
-    const getKey = emoji => Object.keys(emojiAlphabet).find(key => emojiAlphabet[key].includes(emoji));
+    const getKey = emoji => Object.keys(emojiAlphabet).find(key => {
+      if (Array.isArray(emojiAlphabet[key]))
+        return emojiAlphabet[key].includes(emoji);
+    });
 
     if (targetMessage.reactions.size) {
       const emojis = targetMessage.reactions.map(x => x.emoji.name);
@@ -536,7 +539,8 @@ export default class Fun extends CommandGroup {
         if (emoji.length === 2) {
           usedEmotes.push(emoji);
           const char = getKey(emoji);
-          text = text.substring(text.indexOf(char) + 1);
+          if (char)
+            text = text.substring(text.indexOf(char) + 1);
         }
       }
     }
