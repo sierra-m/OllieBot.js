@@ -93,6 +93,20 @@ bot.client.on('guildMemberAdd', async member => {
   }
 });
 
+bot.client.on('guildMemberRemove', async member => {
+  const guildData = await bot.fetchGuildData(member.guild);
+  const leaveChannel = guildData.leaveChannel;
+  if (leaveChannel) {
+    try {
+      const channel = bot.client.channels.get(leaveChannel);
+      const message = guildData.leaveMessage.replace(/@u/gi, member.user.username);
+      await channel.send(message);
+    } catch (e) {
+      logging.error(`guildMemberRemove exception:`, e)
+    }
+  }
+});
+
 process.on('unhandledRejection', error => {
   logging.error('Unhandled promise rejection:', error);
 });

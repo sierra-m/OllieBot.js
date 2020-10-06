@@ -128,45 +128,45 @@ export default class GuildData {
   }
 
   @Conduit.update('update guild set join_channel=? where id=?')
-  setJoinChannel(channel: Discord.Snowflake, stmt: Statement) {
-    this.joinChannel = channel;
-    stmt.run(channel, this.id);
+  setJoinChannel(channel: Discord.TextChannel, stmt: Statement) {
+    this.joinChannel = channel.id;
+    stmt.run(channel.id, this.id);
   }
 
   @Conduit.update('update guild set join_message=? where id=?')
-  setJoinMessage(message: Discord.Snowflake, stmt: Statement) {
+  setJoinMessage(message: String, stmt: Statement) {
     this.joinMessage = message;
     stmt.run(message, this.id);
   }
 
   @Conduit.update('update guild set leave_channel=? where id=?')
-  setLeaveChannel(channel: Discord.Snowflake, stmt: Statement) {
-    this.leaveChannel = channel;
-    stmt.run(channel, this.id);
+  setLeaveChannel(channel: Discord.TextChannel, stmt: Statement) {
+    this.leaveChannel = channel.id;
+    stmt.run(channel.id, this.id);
   }
 
   @Conduit.update('update guild set leave_message=? where id=?')
-  setLeaveMessage(message: Discord.Snowflake, stmt: Statement) {
+  setLeaveMessage(message: String, stmt: Statement) {
     this.leaveMessage = message;
     stmt.run(message, this.id);
   }
 
   @Conduit.update('update guild set music_channel=? where id=?')
-  setMusicChannel(channel: Discord.Snowflake, stmt: Statement) {
-    this.musicChannel = channel;
-    stmt.run(channel, this.id);
+  setMusicChannel(channel: Discord.TextChannel, stmt: Statement) {
+    this.musicChannel = channel.id;
+    stmt.run(channel.id, this.id);
   }
 
   @Conduit.update('update guild set default_role=? where id=?')
-  setDefaultRole(role: Discord.Snowflake, stmt: Statement) {
-    this.defaultRole = role;
-    stmt.run(role, this.id);
+  setDefaultRole(role: Discord.Role, stmt: Statement) {
+    this.defaultRole = role.id;
+    stmt.run(role.id, this.id);
   }
 
   @Conduit.update('update guild set audit_channel=? where id=?')
-  setAuditChannel(channel: Discord.Snowflake, stmt: Statement) {
-    this.auditChannel = channel;
-    stmt.run(channel, this.id);
+  setAuditChannel(channel: Discord.TextChannel, stmt: Statement) {
+    this.auditChannel = channel.id;
+    stmt.run(channel.id, this.id);
   }
 
   @Conduit.access('select command, minutes from rate_limits where guild_id=?')

@@ -137,4 +137,75 @@ export default class Util extends CommandGroup {
     }
   }
 
+  @help({
+    tagline: `Get/set the server's leave message`,
+    usage: ['leavemessage (optional:<set> [new-content])'],
+    description: `Get/set the server leave message. Use the identifier "@u" to use the removed member's username`,
+    examples: ['leavemessage', 'leavemessage set "Goodbye **@u!**"']
+  })
+  @guildOnly
+  @modOnly
+  @aliases(['leavemsg', 'leave-message'])
+  @command('{string} {group}')
+  async leavemessage (bot, message, args, command, content) {
+    const guildData = await bot.fetchGuildData(message.guild);
+    if (command && command === 'set') {
+      if (content) {
+        guildData.setLeaveMessage(content);
+        await message.channel.send(`Leave message set to: \n\`\`\`${content}\`\`\` `);
+      } else {
+        await message.channel.send('Please provide new message content.');
+      }
+    } else {
+      await message.channel.send(`Leave message set to: \n\`\`\`${guildData.leaveMessage}\`\`\` `);
+    }
+  }
+
+  @help({
+    tagline: `Get/set the server's leave message channel`,
+    usage: ['leavechannel (optional:<set> [new-channel])'],
+    description: `Get/set the server's leave message channel.`,
+    examples: ['leavechannel', 'leavechannel set #general']
+  })
+  @guildOnly
+  @modOnly
+  @aliases(['leave-channel'])
+  @command('{string} {textchannel}')
+  async leavechannel (bot, message, args, command, channel) {
+    const guildData = await bot.fetchGuildData(message.guild);
+    if (command && command === 'set') {
+      if (channel) {
+        guildData.setLeaveChannel(channel);
+        await message.channel.send(`Leave channel set to: ${channel.toString()}`);
+      } else {
+        await message.channel.send('Please provide new channel.');
+      }
+    } else {
+      await message.channel.send(`Leave channel set to: <#${guildData.leaveChannel}>`);
+    }
+  }
+
+  @help({
+    tagline: `Get/set the server's join message channel`,
+    usage: ['joinchannel (optional:<set> [new-channel])'],
+    description: `Get/set the server's join message channel.`,
+    examples: ['joinchannel', 'joinchannel set #general']
+  })
+  @guildOnly
+  @modOnly
+  @aliases(['join-channel'])
+  @command('{string} {textchannel}')
+  async joinchannel (bot, message, args, command, channel) {
+    const guildData = await bot.fetchGuildData(message.guild);
+    if (command && command === 'set') {
+      if (channel) {
+        guildData.setJoinChannel(channel);
+        await message.channel.send(`Join channel set to: ${channel.toString()}`);
+      } else {
+        await message.channel.send('Please provide new channel.');
+      }
+    } else {
+      await message.channel.send(`Leave channel set to: <#${guildData.joinChannel}>`);
+    }
+  }
 }
