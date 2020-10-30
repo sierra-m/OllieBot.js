@@ -213,7 +213,7 @@ class ResponseLibrary {
 
     if (!matchResp) return;
 
-    const authorMember = await message.guild.fetchMember(message.author);
+    const authorMember = await message.guild.members.fetch(message.author);
     const auth = await bot.checkMod(authorMember);
 
     // Restrict to those with authorization
@@ -241,7 +241,7 @@ class ResponseLibrary {
 
     if (textContent) messageSent = await message.channel.send(textContent);
     else {
-      const em = new Discord.RichEmbed()
+      const em = new Discord.MessageEmbed()
         .setColor(Color.random().toString())
         .setImage(embedContent);
       messageSent = await message.channel.send(em);

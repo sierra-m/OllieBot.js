@@ -38,10 +38,10 @@ export default class BirthdayGroup extends CommandGroup {
       const found = guildData.birthdays.get(member.id);
       if (found) {
         const timestamp = found.asTimestamp();
-        const em = new Discord.RichEmbed()
+        const em = new Discord.MessageEmbed()
           .setColor('#00ff00')
           .setDescription(`${member.displayName}'s birthday is **${timestamp.format('MMMM Do')}**`)
-          .setAuthor(member.user.username, member.user.avatarURL);
+          .setAuthor(member.user.username, member.user.avatarURL());
         await message.channel.send(em);
       } else {
         await message.channel.send(`No birthday recorded for **${member.displayName}**.`);
@@ -92,11 +92,11 @@ export default class BirthdayGroup extends CommandGroup {
       if (found) {
         const names = [];
         for (let b of found) {
-          const member = message.guild.members.get(b.userId);
+          const member = message.guild.members.cache.get(b.userId);
           if (member) names.push(member.mention)
         }
         if (names.length > 0) {
-          const em = new Discord.RichEmbed()
+          const em = new Discord.MessageEmbed()
             .setColor('#f70c76')
             .setDescription(names.join(', '))
             .setAuthor(`Birthdays for ${timestamp.format('MMMM Do')}`, birthdayIcon);

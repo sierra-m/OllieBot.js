@@ -47,7 +47,7 @@ export default class Admin extends CommandGroup {
     let out = `I have guild IDs **${guildIDs.join(', ')}**\n`;
     const guildNames = [];
     for (let id of guildIDs) {
-      const found = bot.client.guilds.get(id);
+      const found = bot.client.guilds.cache.get(id);
       if (found) {
         guildNames.push(found.name);
       }

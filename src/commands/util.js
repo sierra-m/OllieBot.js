@@ -50,7 +50,7 @@ export default class Util extends CommandGroup {
       let amount = parseInt(args[0]);
       if (!isNaN(amount)) {
         if (amount > 20) amount = 20;
-        const channelMessages = await message.channel.fetchMessages({ limit: 100 });
+        const channelMessages = await message.channel.messages.fetch({ limit: 100 });
         //console.log(`Received ${channelMessages.size}`);
         //console.log(`client user id is apparently ${bot.client.user.id}`);
         const toDelete = await channelMessages.filter(msg => msg.author.id === bot.client.user.id);
@@ -88,7 +88,7 @@ export default class Util extends CommandGroup {
     }
 
     if (member) {
-      const channelMessages = await message.channel.fetchMessages({ limit: 100 });
+      const channelMessages = await message.channel.messages.fetch({ limit: 100 });
 
       let toDelete;
       //console.log(typeof member);

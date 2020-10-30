@@ -46,7 +46,7 @@ async function modOnly (callback, args, name, type) {
     await m.delete(4000);
     return;
   }
-  const authorMember = await message.guild.fetchMember(message.author);
+  const authorMember = await message.guild.members.fetch(message.author);
 
   const auth = await bot.checkMod(authorMember);
   if (auth) {

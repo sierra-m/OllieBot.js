@@ -35,13 +35,13 @@ const matchMemberByName = async (guild, arg) => {
   if (arg.includes('#')) {
     const parts = arg.split('#');
     // search by discriminator
-    result = await guild.members.find(member => member.user.username === parts[0] && member.user.discriminator === parts[1]);
+    result = await guild.members.cache.find(member => member.user.username === parts[0] && member.user.discriminator === parts[1]);
   } else {
     // search members collection for username
-    result = await guild.members.find(member => arg === member.user.username);
+    result = await guild.members.cache.find(member => arg === member.user.username);
     if (!result) {
       // search by nickname
-      result = await guild.members.find(member => arg === member.nickname)
+      result = await guild.members.cache.find(member => arg === member.nickname)
     }
   }
   return result;
@@ -54,7 +54,7 @@ const matchMember = async (message, arg): Discord.GuildMember => {
   if (match) {
     const userID = match[1];
     if (message.guild) {
-      member = await message.guild.members.find(member => member.id === userID);
+      member = await message.guild.members.cache.find(member => member.id === userID);
     }
   } else {
     member = await matchMemberByName(message.guild, arg)
@@ -72,12 +72,12 @@ const matchMessage = async (message, arg: String): Discord.Message => {
  const messageID = match.groups.messageID;
  const channelID = match.groups.channelID;
 
- let found = await message.channel.fetchMessage(messageID);
+ let found = await message.channel.messages.fetch(messageID);
  if (found) return found;
 
- const channel = await message.client.channels.get(channelID);
+ const channel = await message.client.channels.cache.get(channelID);
  if (!channel) return null;
- return await channel.fetchMessage(messageID);
+ return await channel.messages.fetch(messageID);
 };
 
 const matchChannel = async (message, arg: String): Discord.TextChannel => {
@@ -86,13 +86,13 @@ const matchChannel = async (message, arg: String): Discord.TextChannel => {
   let result = null;
   if (match) {
     const channelID = match[1];
-    if (message.guild) result = await message.guild.channels.get(channelID);
-    else result = await message.client.channels.get(channelID);
+    if (message.guild) result = await message.guild.channels.cache.get(channelID);
+    else result = await message.client.channels.cache.get(channelID);
   } else {
-    if (message.guild) result = await message.guild.channels.find(channel =>
+    if (message.guild) result = await message.guild.channels.cache.find(channel =>
       channel.name === arg
     );
-    else result = await message.client.channels.find(channel =>
+    else result = await message.client.channels.cache.find(channel =>
       channel.name === arg
     );
   }
@@ -134,9 +134,9 @@ const matchRole = async (message, arg: String): Discord.Role => {
   let result = null;
   const match = matchID(arg) || arg.match(/<@&([0-9]+)>$/g);
   if (match) {
-    result = await message.guild.roles.get(match[1]);
+    result = await message.guild.roles.cache.get(match[1]);
   } else {
-    result = await message.guild.roles.find(role => role.name === arg);
+    result = await message.guild.roles.cache.find(role => role.name === arg);
   }
   return result;
 };
@@ -155,11 +155,11 @@ const matchEmoji = async (message, arg: String): Discord.Emoji | UnicodeEmoji =>
   let result = null;
   if (match) {
     const emojiID = match[1];
-    if (message.guild) result = await message.guild.emojis.get(emojiID);
-    else result = await message.client.emojis.get(emojiID);
+    if (message.guild) result = await message.guild.emojis.cache.get(emojiID);
+    else result = await message.client.emojis.cache.get(emojiID);
   } else {
-    if (message.guild) result = await message.guild.emojis.find(emoji => emoji.name === arg);
-    else result = await message.client.emojis.find(emoji => emoji.name === arg);
+    if (message.guild) result = await message.guild.emojis.cache.find(emoji => emoji.name === arg);
+    else result = await message.client.emojis.cache.find(emoji => emoji.name === arg);
   }
 
   if (!result) {

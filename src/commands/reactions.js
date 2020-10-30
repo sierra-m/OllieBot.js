@@ -42,7 +42,7 @@ export default class ReactionGroup extends CommandGroup {
   @command('{member}')
   async hug (bot, message, args, member) {
     let image = bot.reactions.getHug();
-    const authorMember = await message.guild.fetchMember(message.author);
+    const authorMember = await message.guild.members.fetch(message.author);
 
     const single_options = ['**{user}** gets a hug',
       'Here, **{user}**, have a hug',
@@ -61,7 +61,7 @@ export default class ReactionGroup extends CommandGroup {
       desc = single_options.random().replace('{user}', authorMember.displayName)
     }
 
-    const em = new Discord.RichEmbed()
+    const em = new Discord.MessageEmbed()
       .setColor(Color.random().toString())
       .setDescription(desc)
       .setImage(image);
@@ -80,7 +80,7 @@ export default class ReactionGroup extends CommandGroup {
   @command('{member}')
   async pat (bot, message, args, member) {
     let image = bot.reactions.getPat();
-    const authorMember = await message.guild.fetchMember(message.author);
+    const authorMember = await message.guild.members.fetch(message.author);
 
     const single_options = ['**{user}** gets a pat',
       'Here, **{user}**, have a pat',
@@ -98,7 +98,7 @@ export default class ReactionGroup extends CommandGroup {
       desc = single_options.random().replace('{user}', authorMember.displayName)
     }
 
-    const em = new Discord.RichEmbed()
+    const em = new Discord.MessageEmbed()
       .setColor(Color.random().toString())
       .setDescription(desc)
       .setImage(image);

@@ -178,7 +178,7 @@ export default class Fun extends CommandGroup {
     const sent = await message.channel.send(`:mag_right: :regional_indicator_w: Searching Wikipedia for \`${query}\``);
     const page : ResolvedPage = await wikiAPI.getPage(query);
     if (page) {
-      const em = new Discord.RichEmbed()
+      const em = new Discord.MessageEmbed()
         .setImage(page.image)
         .setAuthor(
           'Wikipedia',
@@ -210,13 +210,13 @@ export default class Fun extends CommandGroup {
   @command('{member}')
   async joined (bot, message, args, member) {
     if (!member) {
-      member = await message.guild.fetchMember(message.author);
+      member = await message.guild.members.fetch(message.author);
     }
     const joinedAt = moment.utc(member.joinedTimestamp / 1000, 'X').format('MMMM Do[,] YYYY [at] HH:mm:ss');
-    const em = new Discord.RichEmbed()
+    const em = new Discord.MessageEmbed()
       .setDescription(`${member.displayName} joined ${message.guild.name} on ${joinedAt} UTC`)
       .setColor('#00d114')
-      .setAuthor(member.user.username, member.user.avatarURL);
+      .setAuthor(member.user.username, member.user.avatarURL());
     await message.channel.send(em);
   }
 
@@ -235,15 +235,15 @@ export default class Fun extends CommandGroup {
   @command('{member}')
   async userinfo (bot, message, args, member) {
     if (!member) {
-      member = await message.guild.fetchMember(message.author);
+      member = await message.guild.members.fetch(message.author);
     }
     const joinedAt = await moment.utc(member.joinedTimestamp / 1000, 'X').format('MMMM Do[,] YYYY [at] HH:mm:ss [UTC]');
     const createdAt = await moment.utc(member.user.createdTimestamp / 1000, 'X').format('MMMM Do[,] YYYY [at] HH:mm:ss [UTC]');
 
-    const em = new Discord.RichEmbed()
+    const em = new Discord.MessageEmbed()
       .setTitle('════╣User Info╠════\n\u200b')
-      .setAuthor(member.user.username, member.user.avatarURL)
-      .setThumbnail(member.user.avatarURL)
+      .setAuthor(member.user.username, member.user.avatarURL())
+      .setThumbnail(member.user.avatarURL())
       .setColor(statusColors[member.presence.status]);
 
     if (message.guild.owner.id === member.id) em.addField('Owns this server.', '\u200b', false);
@@ -331,7 +331,7 @@ export default class Fun extends CommandGroup {
         else total -= operand;
       }
 
-      const em = new Discord.RichEmbed()
+      const em = new Discord.MessageEmbed()
         .setAuthor('Roll', 'http://moziru.com/images/dungeons-dragons-clipart-d20-12.jpg');
 
       const favorVerbose = {
@@ -370,7 +370,7 @@ export default class Fun extends CommandGroup {
   @aliases(['bunny', 'rabbit', 'bunnies', 'rabbits'])
   @command('{number}')
   async bun (bot, message, args, bunnies) {
-    const getBunny = async ():Discord.RichEmbed => {
+    const getBunny = async ():Discord.MessageEmbed => {
       const result = await fetch('http://www.rabbit.org/fun/net-bunnies.html');
       if (result.status !== 200) return null;
       const raw = await result.text();
@@ -378,7 +378,7 @@ export default class Fun extends CommandGroup {
 
       if (match) {
         const link_match = match[0].match(/<img src="(?<link>[A-Za-z0-9:_\-+./]+)"/i);
-        return new Discord.RichEmbed()
+        return new Discord.MessageEmbed()
           .setColor('#5651ff')
           .setImage(link_match.groups.link);
       }
@@ -419,12 +419,12 @@ export default class Fun extends CommandGroup {
   @aliases(['cats', 'kitty', 'kitties'])
   @command('{number}')
   async cat (bot, message, args, cats) {
-    const getCat = async ():Discord.RichEmbed => {
+    const getCat = async ():Discord.MessageEmbed => {
       const result = await fetch('http://aws.random.cat/meow');
       if (result.status !== 200) return null;
       const payload = await result.json();
 
-      return new Discord.RichEmbed()
+      return new Discord.MessageEmbed()
         .setColor('#ff7500')
         .setImage(payload.file);
     };
@@ -463,12 +463,12 @@ export default class Fun extends CommandGroup {
   @aliases(['woof', 'pupper', 'puppers'])
   @command('{number}')
   async woof (bot, message, args, woofs) {
-    const getWoof = async ():Discord.RichEmbed => {
+    const getWoof = async ():Discord.MessageEmbed => {
       const result = await fetch('https://random.dog/woof.json?include=jpg,png');
       if (result.status !== 200) return null;
       const payload = await result.json();
 
-      return new Discord.RichEmbed()
+      return new Discord.MessageEmbed()
         .setColor('#1dba3a')
         .setImage(payload.url);
     };
@@ -520,7 +520,7 @@ export default class Fun extends CommandGroup {
   async react (bot, message, args, num: number, text: string) {
     if (num < 1) num = 1;
     if (num > 30) num = 30;
-    const messageList = await message.channel.fetchMessages({limit: num+1});
+    const messageList = await message.channel.messages.fetch({limit: num+1});
     await messageList.sort((a, b) => a.createdTimestamp - b.createdTimestamp);
     const targetMessage = messageList.last();
 

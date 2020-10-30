@@ -117,7 +117,7 @@ export default class DiscordBot {
     if (member.id === member.guild.owner.id) return true;
     if (member.id === this.ownerID) return true;
     if (member.hasPermission("ADMINISTRATOR")) return true;
-    for (let role of member.roles.keys()) {
+    for (let role of member.roles.cache.keys()) {
       if (guildData.hasModeRole(role)) return true;
     }
     return false;
@@ -137,13 +137,13 @@ export default class DiscordBot {
         if (now.hour() === 8) {
           logging.info('---> Birthday Checking Event <---');
           try {
-            for (let guildData of this.guilds.array()) {
-              const guild = this.client.guilds.get(guildData.id);
-              const channel = this.client.channels.get(guildData.joinChannel);
+            for (let guildData of this.guilds.cache.array()) {
+              const guild = this.client.guilds.cache.get(guildData.id);
+              const channel = this.client.channels.cache.get(guildData.joinChannel);
               if (guild && channel) {
                 const birthdayUsers = await guildData.matchBirthdays(now);
                 for (let userId of birthdayUsers) {
-                  const member = guild.members.get(userId);
+                  const member = guild.members.cache.get(userId);
                   if (member) {
                     await channel.send(choices.random().replace('{mention}', member.mention));
                   }

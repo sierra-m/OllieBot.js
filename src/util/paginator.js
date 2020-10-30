@@ -3,7 +3,7 @@ import {EmbedField} from '../typedefs/embed-field'
 
 
 export class InfoPage {
-  constructor (embed: Discord.RichEmbed, emoji: string) {
+  constructor (embed: Discord.MessageEmbed, emoji: string) {
     this.embed = embed;
     this.emoji = emoji;
   }
@@ -43,9 +43,9 @@ export default class Paginator {
   }
 
   // indexed from 1
-  render (page: number): Discord.RichEmbed {
+  render (page: number): Discord.MessageEmbed {
     if (page < 1 || page > this.length) throw new Error('Page out of bounds - 1 to length');
-    const em = new Discord.RichEmbed()
+    const em = new Discord.MessageEmbed()
       .setTitle('───────────────────────')
       .setColor(this.color)
       .setAuthor(`${this.title} - ${page}/${this.length}`, this.icon);
@@ -66,7 +66,7 @@ export default class Paginator {
     return this.pages.length;
   }
 
-  addInfoPage (embed: Discord.RichEmbed, emoji: string) {
+  addInfoPage (embed: Discord.MessageEmbed, emoji: string) {
     this.infoPages.set(emoji, new InfoPage(embed, emoji));
   }
 

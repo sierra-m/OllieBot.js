@@ -84,7 +84,7 @@ bot.client.on('guildMemberAdd', async member => {
   const joinChannel = guildData.joinChannel;
   if (joinChannel) {
     try {
-      const channel = bot.client.channels.get(joinChannel);
+      const channel = bot.client.channels.cache.get(joinChannel);
       const message = guildData.joinMessage.replace(/@u/gi, member.mention);
       await channel.send(message);
     } catch (e) {
@@ -98,7 +98,7 @@ bot.client.on('guildMemberRemove', async member => {
   const leaveChannel = guildData.leaveChannel;
   if (leaveChannel) {
     try {
-      const channel = bot.client.channels.get(leaveChannel);
+      const channel = bot.client.channels.cache.get(leaveChannel);
       const message = guildData.leaveMessage.replace(/@u/gi, member.user.username);
       await channel.send(message);
     } catch (e) {

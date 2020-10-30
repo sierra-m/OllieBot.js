@@ -30,7 +30,7 @@ import {sleep, orderedNumerics} from "../util/tools";
 
 const helpIcon = 'https://abs.twimg.com/emoji/v2/72x72/2753.png';
 
-const commandInfo = new Discord.RichEmbed()
+const commandInfo = new Discord.MessageEmbed()
   .setTitle('───────────────────────')
   .setColor('#20c5d4')
   .setAuthor('Command Help', helpIcon)
@@ -149,7 +149,7 @@ export default class Help extends CommandGroup {
           ${(aliases && `\n__Aliases__\n${aliases.join(', ')}`) || ''}`
             .replace(/{mention}/g, `@OllieBot`);
 
-          const em = new Discord.RichEmbed()
+          const em = new Discord.MessageEmbed()
             .setColor('#00ff00')
             .setAuthor(`${bot.prefix}${group.resolveCommand(term)}`, 'https://abs.twimg.com/emoji/v2/72x72/2753.png')
             .setTitle('───────────────────────')
