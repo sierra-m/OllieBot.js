@@ -38,10 +38,11 @@ const matchMemberByName = async (guild, arg) => {
     result = await guild.members.cache.find(member => member.user.username === parts[0] && member.user.discriminator === parts[1]);
   } else {
     // search members collection for username
-    result = await guild.members.cache.find(member => arg === member.user.username);
+    arg = arg.toLowerCase();
+    result = await guild.members.cache.find(member => arg === member.user.username.toLowerCase());
     if (!result) {
       // search by nickname
-      result = await guild.members.cache.find(member => arg === member.nickname)
+      result = await guild.members.cache.find(member => member.nickname && arg === member.nickname.toLowerCase())
     }
   }
   return result;
