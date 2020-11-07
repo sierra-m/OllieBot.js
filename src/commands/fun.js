@@ -685,11 +685,11 @@ export default class Fun extends CommandGroup {
 
     const match = text.match(/(?<=font:)\S+/);
     if (match) {
-      font = match[0];
+      font = match[0].capitalize();
       text = text.replace(/font:\S+\s/, '');
     }
 
-    figlet.text(text, {font: font.capitalize()}, async (err, data) => {
+    figlet.text(text, {font: font}, async (err, data) => {
       if (err) {
         await message.channel.send(`Sorry, ${font} is not a font. Valid fonts: http://www.figlet.org/examples.html`);
       } else {
