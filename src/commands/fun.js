@@ -25,6 +25,7 @@ import Discord from 'discord.js'
 import wikiAPI from '../apis/wiki'
 import StrawPoll from '../apis/strawpoll'
 import googleIt from 'google-it'
+import figlet from 'figlet'
 
 import CommandGroup from '../util/group'
 import command from '../decorators/command'
@@ -668,6 +669,33 @@ export default class Fun extends CommandGroup {
     em.setDescription(desc.join('\n\n'));
 
     await message.channel.send(em)
+  }
+
+  @help({
+    tagline: `create text art`,
+    usage: ['textart (optional:<font:>[some font]) [text]'],
+    description: `Turn provided text into text art. Uses figlet
+    fonts, see http://www.figlet.org/examples.html for a list`,
+    examples: [`textart yes`, `textart font:epic no`]
+  })
+  @aliases(['text-art', 'text_art', 'asciiart'])
+  @command('{group}')
+  async textart (bot, message, args, text: string) {
+    let font = 'Standard';
+
+    const match = text.match(/(?<=font:)\S+/);
+    if (match) {
+      font = match[0];
+      text = text.replace(/font:\S+\s/, '');
+    }
+
+    figlet.text(text, {font: font}, async (err, data) => {
+      if (err) {
+        await message.channel.send(`Sorry, ${font} is not a font. Valid fonts: http://www.figlet.org/examples.html`);
+      } else {
+        await message.channel.send('```' + data.substr(0, 1998) + '```');
+      }
+    })
   }
 
   @help({
