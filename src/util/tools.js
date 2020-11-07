@@ -7,6 +7,10 @@ const getSafe = (thing, def) => {
   return thing;
 };
 
+const truncate = (str, n) => {
+  return (str.length > n) ? str.substr(0, n-1) + '&hellip;' : str;
+};
+
 const orderedNumerics = ['1⃣', '2⃣', '3⃣', '4⃣', '5⃣', '6⃣', '7⃣', '8⃣', '9⃣', '🔟'];
 
-export {sleep, bind, getSafe, orderedNumerics}
+export {sleep, bind, getSafe, orderedNumerics, truncate}

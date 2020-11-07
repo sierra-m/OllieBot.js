@@ -24,6 +24,7 @@
 import Discord from 'discord.js'
 import wikiAPI from '../apis/wiki'
 import StrawPoll from '../apis/strawpoll'
+import googleIt from 'google-it'
 
 import CommandGroup from '../util/group'
 import command from '../decorators/command'
@@ -35,7 +36,7 @@ import fetch from 'node-fetch'
 
 import {ResolvedPage} from '../typedefs/resolved-page'
 import guildOnly from '../decorators/guild-only'
-import {sleep, bind} from '../util/tools'
+import {sleep, bind, truncate} from '../util/tools'
 
 import * as emojiAlphabet from '../resources/emojiAlphabet.json'
 
@@ -520,9 +521,11 @@ export default class Fun extends CommandGroup {
   async react (bot, message, args, num: number, text: string) {
     if (num < 1) num = 1;
     if (num > 30) num = 30;
+    console.log(`Fetching ${num} messages`);
     const messageList = await message.channel.messages.fetch({limit: num+1});
+    console.log(`Fetched ${messageList.size} messages`);
     await messageList.sort((a, b) => a.createdTimestamp - b.createdTimestamp);
-    const targetMessage = messageList.last();
+    const targetMessage = messageList.first();
 
     const usedEmotes = [];
     const failures = [];
@@ -532,8 +535,8 @@ export default class Fun extends CommandGroup {
         return emojiAlphabet[key].includes(emoji);
     });
 
-    if (targetMessage.reactions.size) {
-      const emojis = targetMessage.reactions.map(x => x.emoji.name);
+    if (targetMessage.reactions.cache.size) {
+      const emojis = targetMessage.reactions.cache.map(x => x.emoji.name);
       for (let emoji of emojis) {
         // Unicode emoji have length 2
         if (emoji.length === 2) {
@@ -589,7 +592,7 @@ export default class Fun extends CommandGroup {
     }
 
     const sent = await message.channel.send('✅');
-    await sent.delete(2000);
+    await sent.delete({timeout: 2000});
   }
 
   @help({
@@ -639,6 +642,32 @@ export default class Fun extends CommandGroup {
     }).join(' ');
 
     await message.channel.send(text)
+  }
+
+  @help({
+    tagline: `google something`,
+    usage: ['google [text]'],
+    description: `Saves you a click, Google from discord`,
+    examples: [`google define useful`]
+  })
+  @aliases(['google-it'])
+  @command('{group}')
+  async google (bot, message, args, text: string) {
+    const results = await googleIt({query: text, limit: 5, 'no-display': true});
+
+    const em = new Discord.MessageEmbed()
+      .setAuthor('Google', 'https://storage.googleapis.com/operating-anagram-8280/favicon-32x32.png')
+      .setColor('#4285F4');
+
+    let desc = [];
+    for (let result of results) {
+      let snippetFormatted = result.snippet.replace(/,(?=\S)/g, '');
+      desc.push(`[${truncate(result.title, 200)}](${result.link})\n${truncate(snippetFormatted, 300)}`);
+    }
+
+    em.setDescription(desc.join('\n\n'));
+
+    await message.channel.send(em)
   }
 
   @help({
