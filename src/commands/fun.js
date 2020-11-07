@@ -40,6 +40,7 @@ import guildOnly from '../decorators/guild-only'
 import {sleep, bind, truncate} from '../util/tools'
 
 import * as emojiAlphabet from '../resources/emojiAlphabet.json'
+import * as figletFontmap from '../resources/figletFontmap.json'
 
 const numToRegional = {
   '0': '0⃣',
@@ -685,13 +686,18 @@ export default class Fun extends CommandGroup {
 
     const match = text.match(/(?<=font:)\S+/);
     if (match) {
-      font = match[0].capitalize();
+      font = match[0];
+      if (!Object.keys(figletFontmap).includes(font)) {
+        await message.channel.send(`Sorry, ${font} is not a font I have on file. Valid fonts: http://www.figlet.org/examples.html`);
+        return;
+      }
+
       text = text.replace(/font:\S+\s/, '');
     }
 
-    figlet.text(text, {font: font}, async (err, data) => {
+    figlet.text(text, {font: figletFontmap[font]}, async (err, data) => {
       if (err) {
-        await message.channel.send(`Sorry, ${font} is not a font. Valid fonts: http://www.figlet.org/examples.html`);
+        await message.channel.send(`Sorry, that didn't seem to work`);
       } else {
         await message.channel.send('```' + data.substr(0, 1998) + '```');
       }
