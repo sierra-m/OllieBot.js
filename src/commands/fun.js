@@ -686,7 +686,7 @@ export default class Fun extends CommandGroup {
 
     const match = text.match(/(?<=font:)\S+/);
     if (match) {
-      font = match[0];
+      font = match[0].toLowerCase();
       if (!Object.keys(figletFontmap).includes(font)) {
         await message.channel.send(`Sorry, ${font} is not a font I have on file. Valid fonts: http://www.figlet.org/examples.html`);
         return;
