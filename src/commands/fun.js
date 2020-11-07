@@ -691,7 +691,6 @@ export default class Fun extends CommandGroup {
 
     figlet.text(text, {font: font.capitalize()}, async (err, data) => {
       if (err) {
-        console.log(err);
         await message.channel.send(`Sorry, ${font} is not a font. Valid fonts: http://www.figlet.org/examples.html`);
       } else {
         await message.channel.send('```' + data.substr(0, 1998) + '```');
