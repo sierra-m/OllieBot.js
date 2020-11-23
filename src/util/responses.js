@@ -166,7 +166,7 @@ class ResponseLibrary {
   add (resp: Response, stmt) {
     const found = this.get(resp.name);
     if (!found) {
-      console.log(resp);
+      //console.log(resp);
       stmt.run(
         resp.guild_id,
         resp.name,
