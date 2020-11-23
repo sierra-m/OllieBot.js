@@ -248,7 +248,7 @@ class ResponseLibrary {
     }
 
     if (matchResp.delete_after) {
-      await messageSent.delete(matchResp.delete_after * 1000);
+      await messageSent.delete({timeout: matchResp.delete_after * 1000});
     }
   }
 
