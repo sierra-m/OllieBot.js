@@ -116,7 +116,8 @@ export default class CommandGroup {
     try {
       await this[subcommand](bot, message, args);
     } catch (e) {
-      await console.error(error);
+      //console.log(`It's very unhappy with subcommand name ${subcommand}`);
+      await console.error(e);
     }
   }
 }

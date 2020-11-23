@@ -67,6 +67,14 @@ Discord.Message.prototype.hasMedia = function () {
   return this.attachments.size > 0 || this.embeds.size > 0;
 };
 
+Discord.Message.prototype.getMediaUrl = function () {
+  if (this.attachments.size > 0)
+    return this.attachments.first().url;
+  if (this.embeds.length > 0)
+    return this.embeds[0].url;
+  return null;
+};
+
 const bot = new DiscordBot(botName, ownerID);
 bot.loadCommands(['fun', 'util', 'admin', 'reactions', 'response', 'birthday']);
 bot.loadHelp();

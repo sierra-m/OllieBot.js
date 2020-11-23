@@ -32,6 +32,7 @@ import subcommand from '../decorators/subcommand'
 import modOnly from '../decorators/mod-only'
 import {orderedNumerics} from "../util/tools";
 import Paginator, {Pages} from "../util/paginator";
+import {Response} from "../util/responses";
 
 const listIcon = 'https://abs.twimg.com/emoji/v2/72x72/1f4d1.png';
 
@@ -39,16 +40,31 @@ export default class ResponseGroup extends CommandGroup {
 
   @help({
     tagline: `Manage custom responses`,
-    usage: ['response list', 'response add', 'response remove', 'response edit'],
-    description: `Add and manage custom bot responses.`,
-    examples: ['response list', 'response add cat "Please someone get me a cat I am desperate"']
+    usage: [
+      'response list',
+      'response add-text-command [name] [content]',
+      'response add-image-command [name] ([url] or attach image)',
+      'response add-text-keyword [name] [content]',
+      'response add-image-keyword [name] ([url] or attach image)',
+      'response remove [name]',
+      'response edit'
+    ],
+    description: `Add and manage custom bot responses. When adding names with spaces please 
+    enclose in double quotes. A "command" response requires the prefix \`{prefix}\` to reply, while a "keyword" 
+    response does not. In text response content, use @u to replace with the mention of the member who calls it, and add 
+    @ru to the end to replace those with a member argument mention called with the command`,
+    examples: [
+      'response list',
+      'response add-text-command cat "Please someone get me a cat I am desperate"',
+      'response add-keyword-image "bunny flop" https://media.giphy.com/media/j6N49PBSQ5jYk/giphy.gif'
+    ]
   })
   @aliases(['responses'])
   @guildOnly
   @modOnly
   @command()
   async response (bot, message, args) {
-    await message.channel.send(`You've reached the generic response answer`)
+    await message.channel.send(`Please provide a sub-command: [list, add-text-command, add-image-command, add-text-keyword, add-image-keyword, remove, edit]`)
   }
 
   @guildOnly
@@ -99,16 +115,159 @@ export default class ResponseGroup extends CommandGroup {
   @guildOnly
   @modOnly
   @subcommand('response')
-  @extract('{string}', false, false)
-  async remove (bot, message, args, name) {
+  @extract('{string} {group}', {removeQuotes: false})
+  async add_text_command (bot, message, args, name, content) {
+    if (!name) {
+      await message.channel.send('Please provide a name and text content.');
+      return;
+    }
+    if (!content) {
+      await message.channel.send('Please provide text content.');
+      return;
+    }
+    if (/\s/g.test(name)) {
+      await message.channel.send('Command names may not contain spaces. ❌');
+      return;
+    }
+
     name = name.replace(/"/g, '');
+    if (bot.commandHandler.hasCommand(name)) {
+      await message.channel.send(`Response name collides with bot command \`${name}\` ❌`);
+      return;
+    }
+
+    content = content.replace(/"/, '').replace(/"$/, '');  // Remove outer quotes
 
     const guildData = await bot.fetchGuildData(message.guild);
-    const success = guildData.responseLib.remove(name);
-    if (success) {
-      await message.channel.send(`Removed response **${name}**.`)
-    } else {
-      await message.channel.send(`No response named **${name}** exists.`)
+    const addResp = Response.textCommand(message.guild.id, name, content);
+    const success = guildData.responseLib.add(addResp);
+    if (success)
+      await message.channel.send(`Added text command \`${name}\` ✅`);
+    else
+      await message.channel.send(`Response ${name} already exists ❌`);
+  }
+
+  @guildOnly
+  @modOnly
+  @subcommand('response')
+  @extract('{string} {group}', {removeQuotes: false})
+  async add_text_keyword (bot, message, args, name, content) {
+    if (!name) {
+      await message.channel.send('Please provide a name and text content.');
+      return;
     }
+    if (!content) {
+      await message.channel.send('Please provide text content.');
+      return;
+    }
+    name = name.replace(/"/g, '');
+    if (bot.commandHandler.hasCommand(name)) {
+      await message.channel.send(`Response name collides with bot command \`${name}\` ❌`);
+      return;
+    }
+
+    content = content.replace(/"/, '').replace(/"$/, '');  // Remove outer quotes
+
+    const guildData = await bot.fetchGuildData(message.guild);
+    const addResp = Response.textKeyword(message.guild.id, name, content);
+    const success = guildData.responseLib.add(addResp);
+    if (success)
+      await message.channel.send(`Added text keyword \`${name}\` ✅`);
+    else
+      await message.channel.send(`Response ${name} already exists ❌`);
+  }
+
+  @guildOnly
+  @modOnly
+  @subcommand('response')
+  @extract('{string} {string}')
+  async add_image_command (bot, message, args, name, url) {
+    if (!name) {
+      await message.channel.send('Please provide a name and text content.');
+      return;
+    }
+    if (!url) {
+      url = message.getMediaUrl();
+      if (!url) {
+        await message.channel.send('Please provide image url or attach image.');
+        return;
+      }
+    }
+    if (/\s/g.test(name)) {
+      await message.channel.send('Command names may not contain spaces. ❌');
+      return;
+    }
+    name = name.replace(/"/g, '');
+    if (bot.commandHandler.hasCommand(name)) {
+      await message.channel.send(`Response name collides with bot command \`${name}\` ❌`);
+      return;
+    }
+
+
+    const guildData = await bot.fetchGuildData(message.guild);
+    const addResp = Response.imageCommand(message.guild.id, name, url);
+    const success = guildData.responseLib.add(addResp);
+    if (success)
+      await message.channel.send(`Added image command \`${name}\` ✅`);
+    else
+      await message.channel.send(`Response ${name} already exists ❌`);
+  }
+
+  @guildOnly
+  @modOnly
+  @subcommand('response')
+  @extract('{string} {string}')
+  async add_image_keyword (bot, message, args, name, url) {
+    if (!name) {
+      await message.channel.send('Please provide a name and text content.');
+      return;
+    }
+    if (!url) {
+      url = message.getMediaUrl();
+      if (!url) {
+        await message.channel.send('Please provide image url or attach image.');
+        return;
+      }
+    }
+    name = name.replace(/"/g, '');
+    if (bot.commandHandler.hasCommand(name)) {
+      await message.channel.send(`Response name collides with bot command \`${name}\` ❌`);
+      return;
+    }
+
+
+    const guildData = await bot.fetchGuildData(message.guild);
+    const addResp = Response.imageKeyword(message.guild.id, name, url);
+    const success = guildData.responseLib.add(addResp);
+    if (success)
+      await message.channel.send(`Added image keyword \`${name}\` ✅`);
+    else
+      await message.channel.send(`Response ${name} already exists ❌`);
+  }
+
+  @guildOnly
+  @modOnly
+  @subcommand('response')
+  @extract('{string}')
+  async remove (bot, message, args, name) {
+    if (name) {
+      const guildData = await bot.fetchGuildData(message.guild);
+      const success = guildData.responseLib.remove(name);
+      if (success) {
+        await message.channel.send(`Removed response **${name}**.`)
+      } else {
+        await message.channel.send(`No response named **${name}** exists. If it contains whitespace, surround it with double-quotes.`)
+      }
+    } else {
+      await message.channel.send('Please provide a command name to remove.')
+    }
+  }
+
+  @guildOnly
+  @modOnly
+  @subcommand('response')
+  @extract('{string}')
+  async edit (bot, message, args, name) {
+    await message.channel.send('Not implemented yet.')
   }
 }

@@ -519,7 +519,7 @@ export default class Fun extends CommandGroup {
     examples: ['react 3 oof']
   })
   @aliases(['reaction'])
-  @command('{number} {group}', true)
+  @command('{number} {group}', {strict: true})
   async react (bot, message, args, num: number, text: string) {
     if (num < 1) num = 1;
     if (num > 30) num = 30;
@@ -605,7 +605,7 @@ export default class Fun extends CommandGroup {
     examples: ['strawpoll "best animal" dog cat', 'strawpoll Choose mm/dd/yyyy dd/mm/yyyy yyyy/mm/dd']
   })
   @aliases(['poll'])
-  @command('{string} {group}', false, false)
+  @command('{string} {group}', {removeQuotes: false})
   async strawpoll (bot, message, args, title: string, optionsPred: string) {
     title = title.replace(/"/g, '');
 

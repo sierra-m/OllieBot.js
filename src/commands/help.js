@@ -147,7 +147,8 @@ export default class Help extends CommandGroup {
           __**Examples**__
           ${found.examples.map(text => `\`${text}\``).join('\n')}
           ${(aliases && `\n__Aliases__\n${aliases.join(', ')}`) || ''}`
-            .replace(/{mention}/g, `@OllieBot`);
+            .replace(/{mention}/g, `@OllieBot`)
+            .replace(/{prefix}/g, bot.prefix);
 
           const em = new Discord.MessageEmbed()
             .setColor('#00ff00')

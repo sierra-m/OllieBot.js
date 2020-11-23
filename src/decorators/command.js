@@ -35,7 +35,8 @@ import {
   matchRole
 } from "../util/converters"
 import DiscordBot from '../core/bot'
-import {sleep} from '../util/tools'
+import {sleep, getSafe} from '../util/tools'
+import {CommandOptions} from "../typedefs/command-options";
 
 /**
  *
@@ -179,14 +180,16 @@ const extractArgs = (pattern, strict=false, removeQuotes=true, enforceTypes=true
 /**
  * Command package
  * @param pattern string
- * @param strict boolean
- * @param removeQuotes boolean
- * @param subcommand boolean
- * @param enforceTypes boolean
+ * @param options CommandOptions
  * @returns {Function}
  */
-export default function(pattern, strict=false, removeQuotes=true, subcommand=false, enforceTypes=true) {
+export default function(pattern, options: CommandOptions = {}) {
   return function (target, key, descriptor) {
+    const strict = getSafe(options.strict, false);
+    const removeQuotes = getSafe(options.removeQuotes, true);
+    const subcommand = getSafe(options.subcommand, false);
+    const enforceTypes = getSafe(options.enforceTypes, true);
+
     if (target.commands === undefined) target.commands = [];
     if (target.aliases === undefined) target.aliases = {};
     if (target.subcommands === undefined) target.subcommands = {};
@@ -205,12 +208,14 @@ export default function(pattern, strict=false, removeQuotes=true, subcommand=fal
 /**
  * Extract package
  * @param pattern
- * @param strict
- * @param removeQuotes
- * @param enforceTypes
+ * @param options CommandOptions
  * @returns {function(*=, *=, *=): function(...[*]=): Promise<*>}
  */
-function extract (pattern, strict=false, removeQuotes=true, enforceTypes=true) {
+function extract (pattern, options: CommandOptions = {}) {
+  const strict = getSafe(options.strict, false);
+  const removeQuotes = getSafe(options.removeQuotes, true);
+  const enforceTypes = getSafe(options.enforceTypes, true);
+
   return function (target, key, descriptor) {
     return wrap(extractArgs(pattern, strict, removeQuotes, enforceTypes))(target, key, descriptor);
   }

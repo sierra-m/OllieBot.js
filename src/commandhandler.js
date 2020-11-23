@@ -39,6 +39,15 @@ class CommandHandler {
     this.commandGroups.push(group)
   }
 
+  // Helper util to check all groups from outside, e.g. for response collisions
+  hasCommand (name) {
+    for (const group of this.commandGroups) {
+      if (group.hasCommand(name))
+        return true;
+    }
+    return false;
+  }
+
   async handle (bot: DiscordBot, message) {
     //console.log(`Groups: ${this.commandGroups.map(x => x.constructor.name)}`);
     if (message.author.bot) return;
@@ -68,9 +77,21 @@ class CommandHandler {
     try {
       for (const group of this.commandGroups) {
         if (group.hasCommand(command)) {
-          if (args.length > 0 && group.hasSubcommand(command, args[0])) {
-            const subcommand = args.shift();
-            await group.executeSub(subcommand, bot, message, args);
+          if (args.length > 0) {
+            const possibleSub = args[0];
+            const possibleSubAlt = possibleSub.replace(/-/g, '_');
+
+            if (group.hasSubcommand(command, possibleSub)) {
+              //console.log(`Has subcommand ${possibleSub}`);
+              args.shift();
+              await group.executeSub(possibleSub, bot, message, args);
+            } else if (group.hasSubcommand(command, possibleSubAlt)) {
+              //console.log(`Has subcommand ${possibleSubAlt}`);
+              args.shift();
+              await group.executeSub(possibleSubAlt, bot, message, args);
+            } else {
+              await group.execute(command, bot, message, args);
+            }
           } else {
             await group.execute(command, bot, message, args);
           }

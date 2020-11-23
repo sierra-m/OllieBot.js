@@ -31,7 +31,7 @@ import {matchMember} from "./converters";
 const searchTypes = ['contains', 'exact', 'phrase', 'regex'];
 
 const urlPattern = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
-const imagePattern = /^(https?:\/\/.*\.(?:png|jpg))/i;
+const imagePattern = /^(https?:\/\/.*\.(?:png|jpg|gif))/i;
 
 class Response {
   keyword_pattern;
@@ -160,6 +160,31 @@ class ResponseLibrary {
       if (resp.name === name) return resp;
     }
     return null;
+  }
+
+  @Conduit.update('insert into responses values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+  add (resp: Response, stmt) {
+    const found = this.get(resp.name);
+    if (!found) {
+      console.log(resp);
+      stmt.run(
+        resp.guild_id,
+        resp.name,
+        resp.content,
+        resp.is_image ? 1 : 0,
+        resp.restricted ? 1 : 0,
+        resp.requires_prefix ? 1 : 0,
+        resp.rate_limit,
+        resp.search_type,
+        resp.search_pattern,
+        resp.delete_after
+      );
+      this.responses.push(resp);
+      this.sortResponses();
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @Conduit.update('delete from responses where guild_id=? and name=?')
