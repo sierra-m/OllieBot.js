@@ -52,7 +52,6 @@ export default class ResponseGroup extends CommandGroup {
   }
 
   @guildOnly
-  @modOnly
   @subcommand('response')
   async list (bot, message, args) {
     const guildData = await bot.fetchGuildData(message.guild);
