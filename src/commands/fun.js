@@ -256,7 +256,7 @@ export default class Fun extends CommandGroup {
     em.addField('ID', member.id, false);
     if (member.roles && member.roles.size > 1) {
       // sorts them in reverse and removes first - "@everyone"
-      const roles = Array.from(member.roles.values());
+      const roles = Array.from(member.roles.cache.values());
       await roles.sort((a, b) => b.position - a.position);
       await roles.pop();
       await em.addField('Roles', roles.map(r => r.name).join(', '), false);
