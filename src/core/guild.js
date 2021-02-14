@@ -4,9 +4,10 @@ import Birthdays from '../util/birthdays'
 import RateLimit from '../util/rate-limit'
 import {ExistenceError} from '../util/errors'
 import {Statement} from '../typedefs/statement'
-import {ResponseLibrary} from '../util/responses';
-import { getSafe, sleep } from '../util/tools';
-import moment from "moment";
+import {ResponseLibrary} from '../util/responses'
+import YoutubeFeedsLibrary from '../util/youtube-feeds'
+import { getSafe, sleep } from '../util/tools'
+import moment from "moment"
 
 type GuildOptions = Object;
 
@@ -18,6 +19,7 @@ export default class GuildData {
     this.id = id;
     this.responseLib = new ResponseLibrary(id);
     this.birthdays = new Birthdays(id);
+    this.youtubeFeeds = new YoutubeFeedsLibrary(id);
 
     this.joinChannel = '';
     this.joinMessage = '';
@@ -46,6 +48,7 @@ export default class GuildData {
       this.loadBlockedCommands();
       this.responseLib.load();
       this.birthdays.load();
+      this.youtubeFeeds.load();
       this.created = true;
     }
   }

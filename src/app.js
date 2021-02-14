@@ -1,7 +1,7 @@
 /*
 * The MIT License (MIT)
 *
-* Copyright (c) 2020 Sierra MacLeod
+* Copyright (c) 2021 Sierra MacLeod
 *
 * Permission is hereby granted, free of charge, to any person obtaining a
 * copy of this software and associated documentation files (the "Software"),
@@ -24,8 +24,9 @@
 import cluster from 'cluster'
 import Discord from 'discord.js'
 import moment from 'moment'
-import {botName, ownerID, prefix, token} from './config'
+import {botName, ownerID, prefix, token, googleApiKey} from './config'
 import DiscordBot from './core/bot'
+import Youtube from './apis/youtube'
 import logging from './util/logging'
 import "regenerator-runtime/runtime"
 
@@ -75,8 +76,10 @@ Discord.Message.prototype.getMediaUrl = function () {
   return null;
 };
 
-const bot = new DiscordBot(botName, ownerID);
-bot.loadCommands(['fun', 'util', 'admin', 'reactions', 'response', 'birthday']);
+const youtubeApi = new Youtube(googleApiKey);
+
+const bot = new DiscordBot(botName, ownerID, youtubeApi);
+bot.loadCommands(['fun', 'util', 'admin', 'reactions', 'response', 'birthday', 'feeds']);
 bot.loadHelp();
 
 bot.client.on('ready', () => {
@@ -142,5 +145,5 @@ if (cluster.isMaster) {
 }
 
 if (cluster.isWorker) {
-  Promise.all([bot.login(token), bot.birthdayHandler()]).catch(logging.info);
+  Promise.all([bot.login(token), bot.birthdayHandler(), bot.youtubeFeedHandler()]).catch(logging.info);
 }

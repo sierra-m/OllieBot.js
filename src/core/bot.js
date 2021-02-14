@@ -37,7 +37,7 @@ export default class DiscordBot {
   status;
   guilds;
 
-  constructor (name: string, ownerID: string, options?: Object) {
+  constructor (name: String, ownerID: String, youtubeApi, options?: Object) {
     this.client = new Discord.Client(options);
     this.name = name;
     this.commandHandler = null;
@@ -47,6 +47,7 @@ export default class DiscordBot {
     this.reactions.load();
     this.loadBotData();
     this.loadGuildData();
+    this.youtubeApi = youtubeApi;
     logging.info('Loaded bot from storage.')
   }
 
@@ -137,7 +138,7 @@ export default class DiscordBot {
         if (now.hour() === 8) {
           logging.info('---> Birthday Checking Event <---');
           try {
-            for (let guildData of this.guilds.cache.array()) {
+            for (let guildData of this.guilds.array()) {
               const guild = this.client.guilds.cache.get(guildData.id);
               const channel = this.client.channels.cache.get(guildData.joinChannel);
               if (guild && channel) {
@@ -157,6 +158,33 @@ export default class DiscordBot {
           }
         }
       }
+    }
+  }
+
+  async youtubeFeedHandler (delayMinutes=30) {
+    while (true) {
+      logging.info('---> Youtube Feed Checking Event <---');
+
+      for (let guildData of this.guilds.array()) {
+        for (let feed of guildData.youtubeFeeds.feeds) {
+          try {
+            const lastVideoID = await this.youtubeApi.getLastVideo(feed.youtubeChannelID);
+            if (lastVideoID !== feed.lastVideoID) {
+              guildData.youtubeFeeds.updateVideo(feed.youtubeChannelID, lastVideoID);
+              const channel = this.client.channels.cache.get(feed.discordChannelID);
+              if (channel) {
+                await channel.send(`New YouTube video for **${feed.channelTitle}**:\nhttps://www.youtube.com/watch?v=${lastVideoID}`)
+              } else {
+                logging.error('Youtube Feed checking error - couldn\'t find channel')
+              }
+            }
+          } catch (e) {
+            logging.error('Youtube API error', e);
+          }
+        }
+      }
+
+      await sleep(delayMinutes * 60 * 1000);
     }
   }
 }
