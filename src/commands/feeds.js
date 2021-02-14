@@ -68,7 +68,7 @@ export default class FeedsGroup extends CommandGroup {
 
     if (guildData.youtubeFeeds.length() >= feedsMax) {
       await message.channel.send(`Sorry, the maximum youtube feeds count (**${feedsMax}**) has already been reached. Please 
-      remove one before adding another.`);
+remove one before adding another.`);
       return;
     }
 
@@ -78,7 +78,7 @@ export default class FeedsGroup extends CommandGroup {
         //logging.info(`Channel ID: ${channelId}  Channel Title: ${channelTitle}`);
         if (guildData.youtubeFeeds.hasYoutubeChannel(channelId)) {
           await message.channel.send(`Sorry, this guild already has a feed for channel **${channelTitle}** 
-          somewhere. Please remove it first if you would like to change the discord channel.`);
+somewhere. Please remove it first if you would like to change the discord channel.`);
           return;
         }
         // Get last video ID - it can be null
@@ -93,11 +93,11 @@ export default class FeedsGroup extends CommandGroup {
           await message.channel.send(`Adding youtube feed updates for channel **${channelTitle}** to ${message.channel.toString()}`);
         } else {
           await message.channel.send(`Sorry, an unexpected error occurred 🙁 Please make sure this channel doesn't 
-          already have a feed and ensure the channel link is correct.`);
+already have a feed and ensure the channel link is correct.`);
         }
       } else {
         await message.channel.send(`Sorry, I didn't find any channels for \`${url}\` 🙁 Make sure to provide the channel link or 
-        a video link from the desired channel.`);
+a video link from the desired channel.`);
       }
     } catch (e) {
       console.log(`Youtube API error: ${e}`);
@@ -144,13 +144,13 @@ export default class FeedsGroup extends CommandGroup {
         feed = guildData.youtubeFeeds.get(channelId);
         if (!feed) {
           await message.channel.send(`Sorry, that didn't match any channel url 🙁 Please make sure to provide a 
-          channel link or a video link from the channel`);
+channel link or a video link from the channel`);
           return;
         }
       } catch (e) {
         logging.error('Youtube API Error', e);
         await message.channel.send(`Sorry, that didn't match any title or channel url 🙁 If providing a title  
-        that contains whitespace, make sure to surround it with double-quotes.`);
+that contains whitespace, make sure to surround it with double-quotes.`);
         return;
       }
     }
