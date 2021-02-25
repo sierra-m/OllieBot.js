@@ -161,7 +161,7 @@ export default class DiscordBot {
     }
   }
 
-  async youtubeFeedHandler (delayMinutes=30) {
+  async youtubeFeedHandler (delayMinutes=45) {
     while (true) {
       logging.info('---> Youtube Feed Checking Event <---');
 
