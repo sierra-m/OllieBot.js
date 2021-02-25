@@ -76,4 +76,13 @@ export default class Admin extends CommandGroup {
     await message.channel.send('Taking a short nap... 💤 🐰');
     process.exit(1);
   }
+
+  @ownerOnly
+  @command()
+  async invite (bot, message, args) {
+    const clientId = bot.client.user.id;
+    await message.author.send(
+      `Invite me 😋 https://discord.com/oauth2/authorize?client_id=${clientId}&scope=bot&permissions=1312156736`
+    );
+  }
 }
