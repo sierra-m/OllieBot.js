@@ -84,6 +84,9 @@ bot.loadHelp();
 
 bot.client.on('ready', () => {
   logging.info(`Logged in as ${bot.client.user.tag}!`);
+  bot.client.user.setPresence({ activity: { name: '.help' }, status: 'online' })
+    .then(logging.info)
+    .catch(logging.error);
 });
 
 bot.client.on('message', async msg => {
