@@ -20,7 +20,8 @@ export default async function handleMisc (bot, message) {
             console.log(`Blocked reaction for UID ${message.author.id}`)
           }
         }
-      }/*
+      }
+
       const uwuPattern = /\b((sex)|(cum)|(horny))\b/gi;
       if (uwuPattern.test(message.content)) {
         const badWord = message.content.match(uwuPattern)[0];
@@ -31,8 +32,10 @@ export default async function handleMisc (bot, message) {
           .setURL(message.url)
           .setColor('#ff0000')
           .setDescription(`${message.author.toString()} posted the word **${badWord}** [here](${message.url})`);
-        const me = bot.client.users.cache.get(ownerID);
-        await me.send({content: me.toString(), embed: em});*/
+        const channel = this.client.channels.cache.get('825725949844389898');
+        if (channel)
+          await channel.send({content: '<@&457248610367569940>', embed: em});
+      }
     }
   }
 }
