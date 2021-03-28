@@ -32,7 +32,7 @@ export default async function handleMisc (bot, message) {
           .setURL(message.url)
           .setColor('#ff0000')
           .setDescription(`${message.author.toString()} posted the word **${badWord}** [here](${message.url})`);
-        const channel = this.client.channels.cache.get('825725949844389898');
+        const channel = bot.client.channels.cache.get('825725949844389898');
         if (channel)
           await channel.send({content: '<@&457248610367569940>', embed: em});
       }
