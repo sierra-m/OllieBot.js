@@ -20,20 +20,19 @@ export default async function handleMisc (bot, message) {
             console.log(`Blocked reaction for UID ${message.author.id}`)
           }
         }
-      }
+      }/*
+      const uwuPattern = /\b((sex)|(cum)|(horny))\b/gi;
+      if (uwuPattern.test(message.content)) {
+        const badWord = message.content.match(uwuPattern)[0];
+        const em = new Discord.MessageEmbed()
+          .setAuthor(
+            'uwu patrol',
+            'https://abs-0.twimg.com/emoji/v2/72x72/1f6a8.png')
+          .setURL(message.url)
+          .setColor('#ff0000')
+          .setDescription(`${message.author.toString()} posted the word **${badWord}** [here](${message.url})`);
+        const me = bot.client.users.cache.get(ownerID);
+        await me.send({content: me.toString(), embed: em});*/
     }
-  }
-  const uwuPattern = /\b((sex)|(cum)|(horny))\b/gi;
-  if (uwuPattern.test(message.content)) {
-    const badWord = message.content.match(uwuPattern)[0];
-    const em = new Discord.MessageEmbed()
-      .setAuthor(
-        'uwu patrol',
-        'https://abs-0.twimg.com/emoji/v2/72x72/1f6a8.png')
-      .setURL(message.url)
-      .setColor('#ff0000')
-      .setDescription(`${message.author.toString()} posted the word **${badWord}** [here](${message.url})`);
-    const me = bot.client.users.cache.get(ownerID);
-    await me.send({content: me.toString(), embed: em})
   }
 }
