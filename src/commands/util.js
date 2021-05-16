@@ -237,7 +237,7 @@ export default class Util extends CommandGroup {
   @subcommand('blocked')
   async list (bot, message, args) {
     const guildData = await bot.fetchGuildData(message.guild);
-    if (guildData.blockedCommands.length()) {
+    if (guildData.blockedCommands.length) {
       const em = new Discord.MessageEmbed()
         .setColor('#f74a12')
         .setDescription(guildData.blockedCommands.join('\n'))
