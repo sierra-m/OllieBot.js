@@ -21,21 +21,6 @@ export default async function handleMisc (bot, message) {
           }
         }
       }
-
-      const uwuPattern = /\b((sex)|(cum)|(horny))\b/gi;
-      if (uwuPattern.test(message.content)) {
-        const badWord = message.content.match(uwuPattern)[0];
-        const em = new Discord.MessageEmbed()
-          .setAuthor(
-            'uwu patrol',
-            'https://abs-0.twimg.com/emoji/v2/72x72/1f6a8.png')
-          .setURL(message.url)
-          .setColor('#ff0000')
-          .setDescription(`${message.author.toString()} posted the word **${badWord}** [here](${message.url})`);
-        const channel = bot.client.channels.cache.get('825725949844389898');
-        if (channel)
-          await channel.send({content: '<@&457248610367569940>', embed: em});
-      }
     }
   }
 }

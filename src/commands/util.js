@@ -23,11 +23,15 @@
 */
 
 import CommandGroup from '../util/group'
-import command from '../decorators/command'
+import command, { extract } from '../decorators/command'
 import help from '../decorators/help'
 import modOnly from '../decorators/mod-only'
 import guildOnly from '../decorators/guild-only'
 import aliases from '../decorators/aliases'
+import subcommand from "../decorators/subcommand";
+import Discord from "discord.js";
+
+const blockedIcon = 'https://abs-0.twimg.com/emoji/v2/svg/1f6ab.svg';
 
 export default class Util extends CommandGroup {
 
@@ -212,6 +216,79 @@ export default class Util extends CommandGroup {
         await message.channel.send(`Join channel set to: <#${guildData.joinChannel}>`);
       else
         await message.channel.send(`Join channel not set.`);
+    }
+  }
+
+  @help({
+    tagline: `Manage blocked commands`,
+    usage: ['blocked list', 'blocked add [name]', 'blocked remove [name]'],
+    description: `Add and remove blocked commands. Blocking applies to both default commands and added command responses`,
+    examples: ['blocked add cat', 'blocked remove wiki']
+  })
+  @aliases(['blocked-command', 'blocked_command', 'blockedcommand'])
+  @guildOnly
+  @modOnly
+  @command()
+  async blocked (bot, message, args) {
+    await message.channel.send('Please supply an argument.');
+  }
+
+  @guildOnly
+  @subcommand('blocked')
+  async list (bot, message, args) {
+    const guildData = await bot.fetchGuildData(message.guild);
+    if (guildData.blockedCommands.length()) {
+      const em = new Discord.MessageEmbed()
+        .setColor('#f74a12')
+        .setDescription(guildData.blockedCommands.join('\n'))
+        .setAuthor(`Blocked Commands`, blockedIcon);
+      await message.channel.send(em);
+    } else {
+      const em = new Discord.MessageEmbed()
+        .setColor('#f74a12')
+        .setDescription('No blocked commands set for this guild')
+        .setAuthor(`Blocked Commands`, blockedIcon);
+      await message.channel.send(em);
+    }
+  }
+
+  @guildOnly
+  @subcommand('blocked')
+  @extract('{string}')
+  async add (bot, message, args, name) {
+    const guildData = await bot.fetchGuildData(message.guild);
+    if (name) {
+      try {
+        guildData.addBlockedCommand(name);
+        await message.channel.send(`Added **${name}** to blocked commands ✅`);
+      } catch (e) {
+        if (e instanceof ExistenceError)
+          await message.channel.send(`Command **${name}** already blocked`);
+        else
+          await message.channel.send('Something went wrong :( Try again?');
+      }
+    } else {
+      await message.channel.send('Please provide command name.');
+    }
+  }
+
+  @guildOnly
+  @subcommand('blocked')
+  @extract('{string}')
+  async remove (bot, message, args, name) {
+    const guildData = await bot.fetchGuildData(message.guild);
+    if (name) {
+      try {
+        guildData.removeBlockedCommand(name);
+        await message.channel.send(`Removed **${name}** from blocked commands ✅`);
+      } catch (e) {
+        if (e instanceof ExistenceError)
+          await message.channel.send(`Command **${name}** not blocked`);
+        else
+          await message.channel.send('Something went wrong :( Try again?');
+      }
+    } else {
+      await message.channel.send('Please provide command name.');
     }
   }
 }
