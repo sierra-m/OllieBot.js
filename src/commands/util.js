@@ -223,7 +223,7 @@ export default class Util extends CommandGroup {
   @help({
     tagline: `Manage blocked commands`,
     usage: ['blocked list', 'blocked add [name]', 'blocked remove [name]'],
-    description: `Add and remove blocked commands. Blocking applies to both default commands and added command responses`,
+    description: `Add and remove blocked commands. Blocking applies to default command names only`,
     examples: ['blocked add cat', 'blocked remove wiki']
   })
   @aliases(['blocked-command', 'blocked_command', 'blockedcommand'])

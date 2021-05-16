@@ -54,6 +54,7 @@ class CommandHandler {
 
     await handleMisc(bot, message);
 
+    // Handle new guild registering
     try {
       if (message.guild) {
         const guildData = await bot.fetchGuildData(message.guild);
@@ -62,6 +63,7 @@ class CommandHandler {
           const newGuildData = new GuildData(message.guild.id, {joinChannel: message.guild.systemChannelID});
           await bot.addGuildData(newGuildData);
         } else {
+          // guild_data confirmed to exist so execute responses
           await guildData.responseLib.execute(bot, message);
         }
       }
@@ -73,6 +75,21 @@ class CommandHandler {
 
     const args = await message.content.slice(bot.prefix.length).split(/ +/, 11);
     const command = await args.shift().toLowerCase();
+
+    // Handle blocked commands, then responses
+    try {
+      if (message.guild) {
+        const guildData = await bot.fetchGuildData(message.guild);
+        if (guildData) {
+          const perms = bot.checkMod(message.author);
+
+          if (guildData.isBlocked(command) && !perms)
+            return;
+        }
+      }
+    } catch (e) {
+      await console.error(e);
+    }
 
     try {
       for (const group of this.commandGroups) {
