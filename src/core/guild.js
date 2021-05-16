@@ -126,7 +126,7 @@ export default class GuildData {
     if (!(this.blockedCommands.includes(command))) {
       throw new ExistenceError(`Command '${command}' is not blocked`)
     }
-    this.blockedCommands.remove(command);
+    this.blockedCommands = this.blockedCommands.remove(command);
     stmt.run(this.id, command);
   }
 
