@@ -31,7 +31,7 @@ import aliases from '../decorators/aliases'
 import subcommand from "../decorators/subcommand";
 import Discord from "discord.js";
 
-const blockedIcon = 'https://abs-0.twimg.com/emoji/v2/svg/1f6ab.svg';
+const blockedIcon = 'https://abs-0.twimg.com/emoji/v2/72x72/1f6ab.png';
 
 export default class Util extends CommandGroup {
 
