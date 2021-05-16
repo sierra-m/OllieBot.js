@@ -25,6 +25,7 @@
 import DiscordBot from './core/bot'
 import GuildData from "./core/guild";
 import handleMisc from './util/handle-misc'
+import logging from './util/logging'
 
 class CommandHandler {
   constructor (groups: Array<Class>) {
