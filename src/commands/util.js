@@ -29,6 +29,7 @@ import modOnly from '../decorators/mod-only'
 import guildOnly from '../decorators/guild-only'
 import aliases from '../decorators/aliases'
 import subcommand from "../decorators/subcommand";
+import {ExistenceError} from '../util/errors'
 import Discord from "discord.js";
 
 const blockedIcon = 'https://abs-0.twimg.com/emoji/v2/72x72/1f6ab.png';

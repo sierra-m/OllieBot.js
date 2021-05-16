@@ -114,7 +114,7 @@ export default class GuildData {
 
   @Conduit.update('insert into blocked_commands values (?, ?)')
   addBlockedCommand (command: String, stmt: Statement) {
-    if (command in this.blockedCommands) {
+    if (this.blockedCommands.includes(command)) {
       throw new ExistenceError(`Command '${command}' is already blocked`)
     }
     this.blockedCommands.push(command);
@@ -123,7 +123,7 @@ export default class GuildData {
 
   @Conduit.update('delete from blocked_commands where guild_id=? and command=?')
   removeBlockedCommand (command: String, stmt: Statement) {
-    if (!(command in this.blockedCommands)) {
+    if (!(this.blockedCommands.includes(command))) {
       throw new ExistenceError(`Command '${command}' is not blocked`)
     }
     this.blockedCommands.remove(command);
