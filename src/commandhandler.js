@@ -83,6 +83,8 @@ class CommandHandler {
         if (guildData) {
           const perms = bot.checkMod(message.author);
 
+          logging.info(`command ${command} blocked stat: ${perms}`);
+
           if (guildData.isBlocked(command) && !perms)
             return;
         }
