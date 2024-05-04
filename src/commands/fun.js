@@ -75,36 +75,32 @@ export default class Fun extends CommandGroup {
   }
 
   @help({
-    tagline: `Tell OllieBot he's good`,
+    tagline: `Tell AzukiBot she's good`,
     usage: ['good (optional: [noun])'],
-    description: `Tell OllieBot he's good`,
+    description: `Tell AzukiBot she's good`,
     examples: ['good bot']
   })
   @command()
   async good (bot, message, args) {
-    if (args && args[0] in ['bot', 'bun', 'bunny', 'ollie']) {
-      await message.channel.send('good human');
+    if (args && args[0] in ['bot', 'cat', 'kitty', 'azuki']) {
+      await message.channel.send('good human, I will spare you');
     } else {
-      await message.channel.send(['no u', 'U(◠﹏◠)U'].random())
+      await message.channel.send(['no u', '(=ↀωↀ=)'].random())
     }
   }
 
   @help({
-    tagline: `Tell OllieBot he's bad 🙁`,
+    tagline: `Tell AzukiBot she's bad 🙁`,
     usage: ['bad (optional: [noun])'],
-    description: `Tell OllieBot he's bad 🙁`,
+    description: `Tell AzukiBot she's bad 🙁`,
     examples: ['bad bot']
   })
   @command()
   async bad (bot, message, args) {
-    if (message.author.id === '238038532369678336') {
-      await message.channel.send(['good cake', 'great cake', 'i love cake'].random());
-      return
-    }
     if (args) {
       console.log(args[0]);
-      if (args[0] in ['bot', 'bun', 'bunny', 'ollie'])
-        await message.channel.send(`${message.author.mention()} bad human`);
+      if (args[0] in ['bot', 'cat', 'kitty', 'azuki'])
+        await message.channel.send(`${message.author.mention()} bad human (๑✪ᆺ✪๑)`);
       else if (args[0] === 'help')
         await message.channel.send(`Well I'm more help than you 😤`);
       else message.channel.send('no u');
@@ -117,7 +113,7 @@ export default class Fun extends CommandGroup {
     tagline: `Adds some 🅱 to text`,
     usage: ['b-ify [text]'],
     description: `Adds some 🅱 to text.`,
-    examples: ['b-ify OllieBot is a good boy']
+    examples: ['b-ify AzukiBot is a good kitty']
   })
   @aliases(['bify', 'b-ify'])
   @command('{group}')
@@ -136,7 +132,7 @@ export default class Fun extends CommandGroup {
     description: `Converts \`text\` into regional indicators. ` +
     `This method is case insensitive.`,
     examples: [
-      'bigtext OllieBot is a good boy',
+      'bigtext AzukiBot is a good baby',
       'bigtext copyable This text is copyable'
     ]
   })
@@ -499,15 +495,6 @@ export default class Fun extends CommandGroup {
         await message.channel.send('Oh no! The server is having problems :(');
       }
     }
-  }
-
-  // Guild-specific so won't have a public help
-  @command()
-  async late (bot, message, args) {
-    if (message.guild.id === '313841769441787907') return;
-
-    const duration = moment(moment().unix() + Math.random()*[100,10000,1000000].random(), 'X').fromNow();
-    await message.channel.send(`Shoe is now ${duration.substring(3)} late`)
   }
 
   @help({
