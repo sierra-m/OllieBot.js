@@ -20,7 +20,7 @@ const extractTwitterURL = (text) => {
 export default async function handleMisc (bot, message) {
   const foundTwitterURL = extractTwitterURL(message.content);
   if (foundTwitterURL) {
-    const fullURL = `https://x.com/${foundTwitterURL}`
+    const fullURL = `https://twitter.com/${foundTwitterURL}`
     const em = new Discord.MessageEmbed()
       .setURL(fullURL)
       .setColor('#0092d1')
