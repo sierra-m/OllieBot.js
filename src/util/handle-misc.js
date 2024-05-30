@@ -3,11 +3,11 @@ import {ownerID} from '../config'
 
 const extractTwitterURL = (text) => {
   let found = text.match(/(?<=vxtwitter\.com\/)[^\n?]+/i);
-  if (found.length > 0) {
+  if (found && found.length > 0) {
     return found[0];
   }
-  found = text.match(/(?<=fixupx\.com\/)[^\n?]+/);
-  if (found.length > 0) {
+  found = text.match(/(?<=fixupx\.com\/)[^\n?]+/i);
+  if (found && found.length > 0) {
     return found[0];
   }
 }
