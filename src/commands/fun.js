@@ -75,37 +75,33 @@ export default class Fun extends CommandGroup {
   }
 
   @help({
-    tagline: `Tell OllieBot he's good`,
+    tagline: `Tell AzukiBot she's good`,
     usage: ['good (optional: [noun])'],
-    description: `Tell OllieBot he's good`,
+    description: `Tell AzukiBot she's good`,
     examples: ['good bot']
   })
-  @command()
-  async good (bot, message, args) {
-    if (args && args[0] in ['bot', 'bun', 'bunny', 'ollie']) {
-      await message.channel.send('good human');
+  @command('{group}')
+  async good (bot, message, args, text: String) {
+    if (text && ['bot', 'cat', 'kitty', 'azuki'].includes(text)) {
+      await message.channel.send('good human, I will spare you');
     } else {
-      await message.channel.send(['no u', 'U(◠﹏◠)U'].random())
+      await message.channel.send(['no u', '(=ↀωↀ=)'].random())
     }
   }
 
   @help({
-    tagline: `Tell OllieBot he's bad 🙁`,
+    tagline: `Tell AzukiBot she's bad 🙁`,
     usage: ['bad (optional: [noun])'],
-    description: `Tell OllieBot he's bad 🙁`,
+    description: `Tell AzukiBot she's bad 🙁`,
     examples: ['bad bot']
   })
-  @command()
-  async bad (bot, message, args) {
-    if (message.author.id === '238038532369678336') {
-      await message.channel.send(['good cake', 'great cake', 'i love cake'].random());
-      return
-    }
-    if (args) {
-      console.log(args[0]);
-      if (args[0] in ['bot', 'bun', 'bunny', 'ollie'])
-        await message.channel.send(`${message.author.mention()} bad human`);
-      else if (args[0] === 'help')
+  @command('{group}')
+  async bad (bot, message, args, text: String) {
+    if (text) {
+      console.log(text);
+      if (['bot', 'cat', 'kitty', 'azuki'].includes(text))
+        await message.channel.send(`${message.author} bad human (๑✪ᆺ✪๑)`);
+      else if (text === 'help')
         await message.channel.send(`Well I'm more help than you 😤`);
       else message.channel.send('no u');
     } else {
@@ -117,7 +113,7 @@ export default class Fun extends CommandGroup {
     tagline: `Adds some 🅱 to text`,
     usage: ['b-ify [text]'],
     description: `Adds some 🅱 to text.`,
-    examples: ['b-ify OllieBot is a good boy']
+    examples: ['b-ify AzukiBot is a good kitty']
   })
   @aliases(['bify', 'b-ify'])
   @command('{group}')
@@ -136,7 +132,7 @@ export default class Fun extends CommandGroup {
     description: `Converts \`text\` into regional indicators. ` +
     `This method is case insensitive.`,
     examples: [
-      'bigtext OllieBot is a good boy',
+      'bigtext AzukiBot is a good baby',
       'bigtext copyable This text is copyable'
     ]
   })
