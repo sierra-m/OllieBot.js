@@ -1,26 +1,30 @@
 import Discord from 'discord.js'
 import {ownerID} from '../config'
 
+const extractTwitterURL = (text) => {
+  let found = text.match(/(?<=vxtwitter\.com\/)[^\n?]+/i);
+  if (found.length > 0) {
+    return found[0];
+  }
+  found = text.match(/(?<=fixupx\.com\/)[^\n?]+/);
+  if (found.length > 0) {
+    return found[0];
+  }
+}
+
 /**
  * For handling all miscellaneous and custom behavior on each command
  * @param bot
  * @param message
  */
 export default async function handleMisc (bot, message) {
-  // Shoe
-  if (message.guild) {
-    if (message.guild.id === '313841769441787907') {
-      if (message.hasMedia()) {
-        // disco-memes, emote submissions
-        if (['498444135615692820', '607765472439697418'].includes(message.channel.id)) {
-          try {
-            await message.react('👍');
-            await message.react('👎');
-          } catch (e) {
-            console.log(`Blocked reaction for UID ${message.author.id}`)
-          }
-        }
-      }
-    }
+  const foundTwitterURL = extractTwitterURL(message.content);
+  if (foundTwitterURL) {
+    const fullURL = `https://x.com/${foundTwitterURL}`
+    const em = new Discord.MessageEmbed()
+      .setURL(fullURL)
+      .setColor('#0092d1')
+      .setDescription(`Open this twitter link [here](${fullURL})`);
+    await message.channel.send(em);
   }
 }
