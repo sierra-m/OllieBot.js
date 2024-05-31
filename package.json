@@ -23,7 +23,7 @@
     "node-fetch": "^2.6.0",
     "node-log-rotate": "^0.1.5",
     "regenerator-runtime": "^0.13.3",
-    "sharp": "^0.33.4",
+    "sharp": "^0.30.7",
     "wikijs": "^6.0.1"
   },
   "devDependencies": {
