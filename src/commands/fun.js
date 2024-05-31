@@ -26,9 +26,11 @@ import wikiAPI from '../apis/wiki'
 import StrawPoll from '../apis/strawpoll'
 import googleIt from 'google-it'
 import figlet from 'figlet'
+import sharp from 'sharp'
+import axios from 'axios'
 
 import CommandGroup from '../util/group'
-import command from '../decorators/command'
+import command, {extract} from '../decorators/command'
 import help from '../decorators/help'
 import aliases from '../decorators/aliases'
 import ownerOnly from '../decorators/owner-only'
@@ -41,6 +43,8 @@ import {sleep, bind, truncate} from '../util/tools'
 
 import * as emojiAlphabet from '../resources/emojiAlphabet.json'
 import * as figletFontmap from '../resources/figletFontmap.json'
+import modOnly from "../decorators/mod-only";
+import subcommand from "../decorators/subcommand";
 
 const numToRegional = {
   '0': '0⃣',
@@ -717,5 +721,62 @@ export default class Fun extends CommandGroup {
     } else {
       await message.channel.send('There was no extraction.')
     }
+  }
+
+  @help({
+    tagline: `Tools for working with ishihara plates`,
+    usage: [
+      'ishihara solve ([url] or attach image)'
+    ],
+    description: `Currently contains only a solver tool for ishihara plate tests, more may come`,
+    examples: [
+      'ishihara solve https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Ishihara_9.svg/280px-Ishihara_9.svg.png'
+    ]
+  })
+  @aliases(['colorblind'])
+  @guildOnly
+  @command()
+  async ishihara (bot, message, args) {
+    await message.channel.send(`Please provide a sub-command: [solve]`)
+  }
+
+  @guildOnly
+  @subcommand('ishihara')
+  @extract('{string}')
+  async solve (bot, message, args, url) {
+    if (!url) {
+      url = message.getMediaUrl();
+      if (!url) {
+        await message.channel.send('Please provide image url or attach image.');
+        return;
+      }
+    }
+
+    const input = (await axios({ url: url, responseType: "arraybuffer" })).data;
+    const { data, info } = await sharp(input)
+      // output the raw pixels
+      .ensureAlpha()
+      .extractChannel(3)
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const { width, height, channels } = info;
+    const pixelArray = new Uint8ClampedArray(data.buffer);
+
+    for (let idx = 0; idx < pixelArray.length; idx += 3) {
+      const channelVals = [pixelArray[idx], pixelArray[idx+1], pixelArray[idx+2]];
+      // If all the same, move on to next
+      if ((new Set(channelVals)).size === 1) {
+        continue;
+      }
+      const maxChannelIdx = channelVals.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
+      channelVals[maxChannelIdx] = 255;
+      for (let offset = 0; offset < 3; offset += 1) {
+        pixelArray[idx + offset] = channelVals[offset];
+      }
+    }
+
+    await sharp(pixelArray, { raw: { width, height, channels } })
+      .toFile('output.png');
+    await message.channel.send({ files: [{ attachment: 'output.png' }] });
   }
 }
