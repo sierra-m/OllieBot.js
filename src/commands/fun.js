@@ -753,14 +753,12 @@ export default class Fun extends CommandGroup {
     const input = (await axios({ url: url, responseType: "arraybuffer" })).data;
     const { data, info } = await sharp(input)
       // output the raw pixels
-      .ensureAlpha()
-      .extractChannel(3)
       .raw()
       .toBuffer({ resolveWithObject: true });
     const { width, height, channels } = info;
     const pixelArray = new Uint8ClampedArray(data.buffer);
 
-    for (let idx = 0; idx < pixelArray.length; idx += 3) {
+    for (let idx = 0; idx < pixelArray.length; idx += channels) {
       const channelVals = [pixelArray[idx], pixelArray[idx+1], pixelArray[idx+2]];
       // If all the same, move on to next
       if ((new Set(channelVals)).size === 1) {
