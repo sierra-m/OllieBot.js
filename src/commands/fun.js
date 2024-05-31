@@ -764,8 +764,15 @@ export default class Fun extends CommandGroup {
       if ((new Set(channelVals)).size === 1) {
         continue;
       }
-      const maxChannelIdx = channelVals.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
-      channelVals[maxChannelIdx] = 255;
+      let indices = new Array(3)
+      for (let i = 0; i < 3; i += 1) indices[i] = i;
+
+      indices.sort((a, b) => { return channelVals[a] < channelVals[b] ? -1 : channelVals[a] > channelVals[b] ? 1 : 0; })
+
+      // set the highest channel value to 255, and the second highest to 0, exacerbating the diff
+      channelVals[indices[3]] = 255;
+      channelVals[indices[2]] = 0;
+
       for (let offset = 0; offset < 3; offset += 1) {
         pixelArray[idx + offset] = channelVals[offset];
       }
