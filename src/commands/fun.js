@@ -734,13 +734,11 @@ export default class Fun extends CommandGroup {
     ]
   })
   @aliases(['colorblind'])
-  @guildOnly
   @command()
   async ishihara (bot, message, args) {
     await message.channel.send(`Please provide a sub-command: [solve]`)
   }
 
-  @guildOnly
   @subcommand('ishihara')
   @extract('{string}')
   async solve (bot, message, args, url) {
